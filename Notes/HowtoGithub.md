@@ -35,9 +35,13 @@ To check the linking run:
 
 `git branch -M main` 
 
-Now push the current branch to github (***origin*** is the default name for your remote repository, while main tells git which branch you want to push)
+
+
+Now push the current branch to github (***origin*** is the default name for your remote repository, while **main** tells git which branch you want to push)
 
 `git push -u origin main` 
+
+*Will see something like this:*
 
 > Enumerating objects: 5, done.
 > Counting objects: 100% (5/5), done.
