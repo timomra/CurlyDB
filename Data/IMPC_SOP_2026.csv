@@ -1,0 +1,11 @@
+dataField,dataType,minValue,maxValue,exampleValues,remarks
+analysis_id,String,15,15,an1000438934,Unique 12 character string containing alphanumerical values for each analysis
+gene_accession_id,String,9,11,MGI:2679336,Unique alphanumeric character string that is used to unambiguously identify a particular record in the Mouse Genome Informatics database
+gene_symbol,String,1,13,Scart2,Official mouse gene symbol in title format; alphanumeric
+strain_name,String,3,25,C57BL/6N,"Name of mouse strain. Values are B6Brd;B6Dnk;B6N-Tyr<c-Brd>, C57BL/6Brd-Tyr<c-Brd>, C57BL/6Dnk, C57BL/6JTyr;C57BL/6N, C57BL/6N, C57BL/6NCrl, C57BL/6NJ, C57BL/6NTac, C57BL/6NTacDen"
+mouse_life_stage,String,4,17,E15.5,Developmental stage of mice being analysed. Values are E12.5; E15.5; E18.5; E9.5; Early adult; Late adult; Middle aged adult
+parameter_id,String,15,20,IMPC_GRS_009_001,ID of phenotyping parameter; alphanumeric
+parameter_name,String,2,200,Forelimb and hindlimb grip strength measurement mean,Name of phenotyping parameter
+pvalue,Float,0,1,0.8004226,Statistical output of the analysis
+allele_symbol,String,10,35,Scart2<tm1b(KOMP)Wtsi>,"Must match gene_symbol, can be used to access more info about specific mutation. Follows standard International Committee on Standardized Genetic Nomenclature for Mice; must have properly closed parentheses and angle brackets. "
+lacz_*,String,7,19,no expression,"Expression data using the lacZ reporter gene to map where mouse genes are expressed in different tissues. Values are: No data, ambiguous, expression, imageOnly, no expression, tissue not available. "

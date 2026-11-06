@@ -1,0 +1,9 @@
+The collaborator has acquired information on knockout genes and human phenotypes from a different source, file ‘bespokeTask.txt’ (titles for the columns are below) but is unsure what genes are currently in your database.   The collaborator wants you to store this information as a separate resource (e.g. called Human Phenotype), and flag (if any) data that overlaps your data from IMPC.   Note more data could be provided on HP name and description in the future (after this assignment).  In addition the collaborator has included some information on the mouse transcript and exon structure of the genes on particular chromosomes (chrom*.txt) please include this in the database.  Note, more data from other chromosomes will be stored in the future.   Please ensure all information and its relevant relationships are incorporated in the database, however, if there is a valid reason all the data cannot be incorporated (e.g. your data contains no genes from this chromosome) please state this in your report.  The database structure must be present for future use.
+
+
+For this task you are welcome to go get more relevant information if time and your capacity permits but this is optional.   The data was retrieved from here:  https://www.informatics.jax.org/downloads/reports/
+
+
+Human Marker Symbol	Human Entrez Gene ID	Mouse Marker Symbol	MGI Marker Accession ID	High-level Mammalian Phenotype ID
+(comma-delimited)
+
