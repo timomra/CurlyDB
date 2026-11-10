@@ -1,5 +1,6 @@
 Clustering methods
 - tSNE, UMAP and PCA (these are dimensionality reduction methods, but we can use them to visualise our clusters)
+- can also use ggtree for hierarchical clustering https://pubmed.ncbi.nlm.nih.gov/32162851/
 
 - k-means
 - hierarchical
