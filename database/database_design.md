@@ -21,12 +21,6 @@
 | allele_symbol | VARCHAR | — | Engineered allele symbol |
 | gene_accession_id | VARCHAR | FK | References Gene(gene_accession_id) |
 
-## 2. Table relationships
-
-| Parent table | Child table | Relationship | Linking attribute |
-|---|---|---|---|
-| Gene | Allele | One-to-many | gene_accession_id |
-
 ### Table 3: Strain
 
 **Purpose:** Store the genetic backgrounds of the mice.
@@ -59,3 +53,12 @@
 | impc_parameter_orig_id | INT | Candidate UNIQUE | Original numerical parameter identifier |
 | parameter_name | VARCHAR | — | Name of the parameter |
 | description | TEXT | — | Additional parameter description |
+
+## 2. Table relationships
+
+| Parent table | Child table | Relationship | Linking attribute |
+|---|---|---|---|
+| Gene | Allele | One-to-many (1:N) | gene_accession_id |
+| Allele | Phenotype Analysis | One-to-many (1:N) | allele_id |
+| Strain | Phenotype Analysis | One-to-many (1:N) | strain_id |
+| Parameter | Phenotype Analysis | One-to-many (1:N) | parameter_id |
