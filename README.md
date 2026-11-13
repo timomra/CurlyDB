@@ -18,11 +18,11 @@
 ## **Tasks to be completed/Timeline:**
 
 1. Retrieve data from the TRE ``(Tim)``
-2. Create and populate the database  ``(Melissa and Ella - Friday November 20th)``
+2. Create and populate the database  ``(Melissa and Ella - Wednesday November 18th)``
 3. Add additional parameter groupings to the database
 
    > ... minimum 3 but more will garner extra credit. (Will be agreed by all in a meeting after the DB is designed)
-4. Design an RShiny dashboard that is robust enough to meet demands of collaborators. ``(Tim and Usman - Friday November 27nd)``
+4. Design an RShiny dashboard that is robust enough to meet demands of collaborators. ``(Tim and Usman - Monday November 23nd)``
    > Should be able to plot scores of phenotypic data 
 
    > Should cluster genes for similar phenotype scores
