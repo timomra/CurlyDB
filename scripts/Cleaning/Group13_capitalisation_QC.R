@@ -2,6 +2,7 @@
 # Import the SOP to examine the expected fields and validation rules
 sop <- read.csv("Data/Group13/IMPC_SOP.csv")
 
+
 # Verify the SOP's dimensions and data types
 dim(sop)
 str(sop)
@@ -35,6 +36,8 @@ for (file in files) {
     failed_files <- c(failed_files, file)
   }
 }
+
+
 
 # Count the files that failed structural validation
 length(failed_files)

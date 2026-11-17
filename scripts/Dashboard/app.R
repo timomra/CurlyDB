@@ -15,7 +15,7 @@ library(reticulate)
 
 pca_iris <- function(){
   df<-iris[,1:4]
-  source_python("../cluster/Iris_PCA.py")
+  source_python("../cluster/PCA.py")
   pca_data <- pca(df)
   
   ggplot(data=pca_data, aes(x=PC1,y=PC2)) +
@@ -109,8 +109,6 @@ ui <-  dashboardPage(
 # ============================================================================ #
 # ================================== Server ================================== #
 # ============================================================================ #
-
-
 server <- function(input, output, session){
   
   
@@ -123,9 +121,6 @@ server <- function(input, output, session){
           "Successfully Selected The Python Environment"}, 
         error= function(e){"Could not find the Python environment"})
     })
-  
-  
-  
   output$plot1 <- renderPlot({
     req(input$GenPlot)  # This stops the code its in until the button is pressed
     

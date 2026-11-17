@@ -27,8 +27,8 @@ str(test_data)
 
 
 ### 1. Read every file once (raw)
-
 raw_list <- lapply(files, read.csv, header = FALSE)
+
 
 # Structural checks on the raw files
 structure_errors <- sum(sapply(raw_list, function(d) nrow(d) != 8 || ncol(d) != 2))
@@ -49,6 +49,7 @@ data_all$file <- basename(files)
 
 # Verify the combined data
 dim(data_all)
+
 
 ## QC result: 30,277 rows 1 per file) and 9 columns (8 SOP fields and file name)
 
@@ -276,3 +277,8 @@ unique(data_all[data_all$gene_symbol %in% query_genes, c("gene_symbol", "gene_ac
 # Example of a gene ID with more than one symbol
 n_sym <- tapply(symbol, mgi, function(x) length(unique(x)))
 head(unique(data_all[mgi %in% names(n_sym)[n_sym > 1], c("gene_accession_id", "gene_symbol")]), 10)
+
+
+
+
+

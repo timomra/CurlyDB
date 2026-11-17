@@ -33,6 +33,7 @@ str(test_data)
 raw_list <- lapply(files, read.csv, header = FALSE)
 ##warning: "EOF within quoted string"
 
+
 # SOP fields that are named differently in the data
 setdiff(sop$dataField, test_data$V1)
 
@@ -384,3 +385,5 @@ summary(p[!is.na(p) & (p < 0 | p > 1)])
 query_ids <- unique(data_all[symbol %in% query_genes, c("gene_symbol", "gene_accession_id")])
 query_ids
 query_ids[!query_ids$gene_accession_id %in% diseases$mgi_id, ]
+
+
