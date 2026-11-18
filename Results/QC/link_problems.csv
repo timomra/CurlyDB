@@ -1,0 +1,6 @@
+"","check","count"
+"1","parameter_stable_id not in parameter file",5195
+"2","  of which contain injected symbols (fail format check)",4143
+"3","  of which are well-formed (genuinely absent from the file)",1052
+"4","parameter_stable_id in file but with a different parameter_name",0
+"5","Genes with disease information (not an error)",919

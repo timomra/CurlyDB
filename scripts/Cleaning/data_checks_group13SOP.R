@@ -1,5 +1,10 @@
-###Group13: Data quality control checks (2026 dataset and SOP)
+# I used this package to make the files load faster
+library(data.table)
 
+# If you're working on the HPC, run this command :)
+# setwd("/scratch/grp/msc_appbio/DCDM_Group13/")
+
+###Group13: Data quality control checks (2026 dataset and SOP)
 # Import the SOP to examine the expected fields and validation rules
 sop <- read.csv("Data/IMPC_SOP_2026.csv")
 
@@ -29,14 +34,13 @@ str(test_data)
 
 
 ### 1. Read every file once (raw) and check its structure
-
-raw_list <- lapply(files, read.csv, header = FALSE)
+raw_list <- lapply(files, fread,header=FALSE)
 ##warning: "EOF within quoted string"
 
 
 # SOP fields that are named differently in the data
 setdiff(sop$dataField, test_data$V1)
-
+ 
 ## QC result: sop and csv files name parameter id, p value and lacz differently
 
 # Expected field names
@@ -82,6 +86,8 @@ rules <- rbind(rules, sop[rep(which(sop$dataField == "lacz_*"), length(lacz_fiel
 rules$dataField <- expected_fields
 
 # SOP corrections (contradictions within the SOP itself)
+# TIM edit:: Did you ask Michelle before editing the SOP requirements?
+
 # analysis_id: min/max say 15, but the remark and example value are 12 characters
 rules[rules$dataField == "analysis_id", c("minValue", "maxValue")] <- 12
 # lacz_*: max is 19, but the allowed value "tissue not available" is 20 characters
@@ -96,6 +102,7 @@ is_missing <- function(x) is.na(x) | trimws(x) == ""
 sop_errors <- data.frame(field = rules$dataField, missing = 0,
                          wrong_type = 0, out_of_range = 0)
 
+# Initial checks 
 for (i in seq_len(nrow(rules))) {
   values  <- data_all[[rules$dataField[i]]]
   missing <- is_missing(values)
@@ -116,7 +123,13 @@ for (i in seq_len(nrow(rules))) {
   sop_errors$wrong_type[i]   <- sum(wrong_type)
   sop_errors$out_of_range[i] <- sum(out_of_range)
 }
-sop_errors
+
+## TIM EDIT:: Nice summary table! I'm just going to save it to and excel file so people can see it without running the script.
+write.csv(
+  x= sop_errors,
+  "Results/QC/SOP_errors.csv"
+)
+
 
 ## QC result:every field has at least one missing value apart from parameter_name 
 ## QC result:every field has at least two out of range values apart from analysis_id, gene_accession_id, parameter_stable_id and parameter_name
@@ -169,14 +182,18 @@ remark_errors <- data.frame(
     sum(!is_missing(lacz)   & !lacz   %in% allowed_values("lacz_*")),
     sum(!is_missing(id)     & !grepl("^[A-Za-z0-9]+$", id)),
     sum(duplicated(id[!is_missing(id)])),
-    sum(!is_missing(mgi)    & !grepl("^MGI:[0-9]+$", mgi)),
+    sum(!is_missing(mgi)    & !grepl("^MGI:[0-9]+$", mgi)), # <- checks that the values are only alphanumeric
     sum(!is_missing(symbol) & !grepl("^[A-Z0-9][A-Za-z0-9]*$", symbol)),
     sum(!is_missing(param)  & !grepl("^[A-Za-z0-9]+(_[A-Za-z0-9]+)+$", param)),
     sum(!is_missing(allele) & !is_missing(symbol) & !startsWith(allele, paste0(symbol, "<"))),
     sum(!is_missing(allele) & !brackets_closed(allele))
   )
 )
-remark_errors
+write.csv(
+  x= remark_errors,
+  "Results/QC/SOP_remark_errors.csv"
+)
+
 
 ## QC result:
 ## Not in SOP allowed values: strain_name 1,540, mouse_life_stage 3,163, lacz fields 36,536 (across all 11 tissues)
@@ -188,7 +205,6 @@ remark_errors
 
 
 ### 4. Structural and consistency checks
-
 consistency_errors <- data.frame(
   check = c("Wrong dimensions (not 20 x 2)", "Field-name format (e.g. laczLung)",
             "Missing/extra/duplicated fields", "Leading/trailing whitespace",
@@ -202,7 +218,13 @@ consistency_errors <- data.frame(
     sum(tapply(data_all$parameter_name, param, function(x) length(unique(x))) > 1)
   )
 )
-consistency_errors
+write.csv(
+  x= consistency_errors,
+  "Results/QC/SOP_structural_checks.csv"
+)
+
+
+
 
 ## QC result:
 ## 1 file does not have 20 x 2 rows/columns (the file with the unmatched quote mark)
@@ -256,7 +278,7 @@ reference_errors <- data.frame(
     "Duplicate rows",
     "Duplicate impcParameterOrigId",
     "parameterId wrong format",
-    "parameterId -> >1 name",
+    "parameterId -> >1 name",           # <-- checking that the parameter IDs are unique?
     "name longer than 200 characters (SOP)",
     # procedure
     "Duplicate impcParameterOrigId",
@@ -302,7 +324,10 @@ reference_errors <- data.frame(
     sum(!unique(mgi[symbol %in% query_genes]) %in% diseases$mgi_id)
   )
 )
-reference_errors
+write.csv(
+  x= reference_errors,
+  "Results/QC/Reference_file_checks.csv"
+)
 
 ## QC result:
 ## Parameter file: 2,691 missing descriptions, 14 duplicate rows and 14 duplicate
@@ -335,7 +360,11 @@ link_errors <- data.frame(
     sum(unique(mgi[!is_missing(mgi)]) %in% diseases$mgi_id)
   )
 )
-link_errors
+write.csv(
+  x= link_errors,
+  "Results/QC/link_problems.csv"
+)
+
 
 ## QC result:
 ## 5,195 distinct parameter_stable_ids are not in the parameter file

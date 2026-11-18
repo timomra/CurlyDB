@@ -1,0 +1,11 @@
+"","field","check","errors"
+"1","strain_name","Allowed values",0
+"2","mouse_life_stage","Allowed values",3175
+"3","lacz_* (all tissues)","Allowed values",36611
+"4","analysis_id","Alphanumeric",0
+"5","analysis_id","Unique",131
+"6","gene_accession_id","MGI format",0
+"7","gene_symbol","Title format, alphanumeric",1831
+"8","parameter_stable_id","Alphanumeric (with underscores)",5253
+"9","allele_symbol","Starts with gene_symbol",3177
+"10","allele_symbol","Brackets properly closed",834

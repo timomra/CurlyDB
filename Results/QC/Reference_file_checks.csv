@@ -1,0 +1,18 @@
+"","file","check","errors"
+"1","parameter_description","Duplicate rows",14
+"2","parameter_description","Duplicate impcParameterOrigId",14
+"3","parameter_description","parameterId wrong format",0
+"4","parameter_description","parameterId -> >1 name",25
+"5","parameter_description","name longer than 200 characters (SOP)",0
+"6","procedure","Duplicate impcParameterOrigId",0
+"7","procedure","impcParameterOrigId not in parameter file",0
+"8","procedure","Procedure -> >1 description",1
+"9","disease_information","Duplicate rows",0
+"10","disease_information","HGNC ID wrong format",0
+"11","disease_information","DOID wrong format",0
+"12","disease_information","Mouse MGI ID wrong format",0
+"13","disease_information","Mouse genotype IDs wrong format",0
+"14","disease_information","DOID -> >1 disease name",0
+"15","disease_information","Mouse MGI ID -> >1 mouse symbol",0
+"16","query_genes","Not found in analysis data",0
+"17","query_genes","Gene IDs not found in disease data",1

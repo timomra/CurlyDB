@@ -1,0 +1,8 @@
+"","check","errors"
+"1","Wrong dimensions (not 20 x 2)",3
+"2","Field-name format (e.g. laczLung)",2
+"3","Missing/extra/duplicated fields",6
+"4","Leading/trailing whitespace",4270
+"5","Duplicate records",101
+"6","gene_accession_id -> >1 gene_symbol",1253
+"7","parameter_stable_id -> >1 parameter_name",0
