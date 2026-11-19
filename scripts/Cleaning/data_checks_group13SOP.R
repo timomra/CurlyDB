@@ -68,7 +68,7 @@ field_errors <- sum(sapply(raw_list, function(d)
   !setequal(d$V1, expected_fields) || anyDuplicated(d$V1) > 0))
 
 # One row per file, one column per field (field names used exactly as written)
-data_list <- lapply(raw_list, function(d) setNames(d$V2, d$V1)[expected_fields])
+data_list <- lapply(raw_list, function(d) setNames(d$V2, d$V1)[expected_fields])  
 data_all  <- as.data.frame(do.call(rbind, data_list))
 colnames(data_all) <- expected_fields
 data_all$file <- basename(files)
@@ -124,7 +124,6 @@ for (i in seq_len(nrow(rules))) {
   sop_errors$out_of_range[i] <- sum(out_of_range)
 }
 
-## TIM EDIT:: Nice summary table! I'm just going to save it to and excel file so people can see it without running the script.
 write.csv(
   x= sop_errors,
   "Results/QC/SOP_errors.csv"
