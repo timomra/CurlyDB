@@ -136,8 +136,6 @@ cleaned_data <- cleaned_data %>%
 
 
 
-
-
 # ================= # 
 # Clean Allele symbols
 # ================= #
@@ -164,3 +162,4 @@ cleaned_data <- cleaned_data %>%
 # Finally, save the cleaned dataframe
 
 write.csv(cleaned_data, file="Results/cleaned_data/Clean_names.csv")
+

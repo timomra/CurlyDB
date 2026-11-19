@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<!-- saved from url=(0022)http://localhost:5606/ -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Database Design</title>
+<style class="anchorjs"></style><style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="./Database_Analysis_Planning_files/jquery.min.js.download" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="./Database_Analysis_Planning_files/clipboard.min.js.download"></script>
+<script src="./Database_Analysis_Planning_files/quarto.js.download" type="module"></script>
+<script src="./Database_Analysis_Planning_files/tabsets.js.download" type="module"></script>
+<script src="./Database_Analysis_Planning_files/popper.min.js.download"></script>
+<script src="./Database_Analysis_Planning_files/tippy.umd.min.js.download"></script>
+<script src="./Database_Analysis_Planning_files/anchor.min.js.download"></script>
+<link href="./Database_Analysis_Planning_files/tippy.css" rel="stylesheet">
+<link href="./Database_Analysis_Planning_files/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="./Database_Analysis_Planning_files/bootstrap.min.js.download"></script>
+<link href="./Database_Analysis_Planning_files/bootstrap-icons.css" rel="stylesheet">
+<link href="./Database_Analysis_Planning_files/bootstrap-215b371544c282197b31c8aa00ce3677.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="./Database_Analysis_Planning_files/require.min.js.download" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<style>.ansi-display{font-family:monospace;white-space:pre-wrap;--ansiBlack: #000000;--ansiRed: #cd3131;--ansiGreen: #00BC00;--ansiYellow: #949800;--ansiBlue: #0451a5;--ansiMagenta: #bc05bc;--ansiCyan: #0598bc;--ansiWhite: #555555;--ansiBrightBlack: #666666;--ansiBrightRed: #cd3131;--ansiBrightGreen: #14CE14;--ansiBrightYellow: #b5ba00;--ansiBrightBlue: #0451a5;--ansiBrightMagenta: #bc05bc;--ansiBrightCyan: #0598bc;--ansiBrightWhite: #a5a5a5}.dark-mode .ansi-display{--ansiBlack: #000000;--ansiRed: #cd3131;--ansiGreen: #0DBC79;--ansiYellow: #e5e510;--ansiBlue: #2472c8;--ansiMagenta: #bc3fbc;--ansiCyan: #11a8cd;--ansiWhite: #e5e5e5;--ansiBrightBlack: #666666;--ansiBrightRed: #f14c4c;--ansiBrightGreen: #23d18b;--ansiBrightYellow: #f5f543;--ansiBrightBlue: #3b8eea;--ansiBrightMagenta: #d670d6;--ansiBrightCyan: #29b8db;--ansiBrightWhite: #e5e5e5}@keyframes ansi-displaly-run-blink{50%{opacity:0}}.fui-FluentProvider h2{border-bottom:none;padding-bottom:0}</style><style data-make-styles-bucket="d" data-priority="0"></style><style id="fui-FluentProviderr0"></style></head>
+
+<body class="fullcontent quarto-light" data-tabster="{&quot;root&quot;:{}}" data-new-gr-c-s-check-loaded="14.1166.0" data-gr-ext-installed="">
+
+<i tabindex="0" role="none" data-tabster-dummy="" aria-hidden="true" style="position: fixed; height: 1px; width: 1px; opacity: 0.001; z-index: -1; content-visibility: hidden; top: 0px; left: 0px;"></i><div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Database Design</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>I had a quick read of this classic paper by William Kent to get some idea of the best general practices for DB design</p>
+<p>https://dl.acm.org/doi/pdf/10.1145/358024.358054</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./Database_Analysis_Planning_files/59469128-1-image-2.png" class="img-fluid figure-img"></p>
+<figcaption>image-2.png</figcaption>
+</figure>
+</div>
+<p>Also since I think we were all a little unclear on what fields actually correspond to what, I did some analysis using Pandas in python to get a handle on our data</p>
+<div id="ed2df764" class="cell" data-execution_count="37">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="http://localhost:5606/#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="http://localhost:5606/#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-3"><a href="http://localhost:5606/#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="organising-the-genomic_annotations-section" class="level1">
+<h1>1. Organising the genomic_annotations section</h1>
+<p>(As will be discussed later, we avoided making just a <code>chromosome 3</code> table, as this wouldnt be very extendable - particularly for the bespoke task)</p>
+<div id="638e6382" class="cell" data-execution_count="38">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="http://localhost:5606/#cb2-1" aria-hidden="true" tabindex="-1"></a>chr3 <span class="op">=</span> pd.read_csv(<span class="st">"../data/chrom3.txt"</span>,delimiter<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>As we see here, there are more exons, than transcripts than genes…</p>
+<div id="b978723f" class="cell" data-execution_count="39">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="http://localhost:5606/#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"number of unique gene_ids:"</span> , <span class="bu">len</span>(<span class="bu">set</span>(chr3[<span class="st">"Gene stable ID"</span>])))</span>
+<span id="cb3-2"><a href="http://localhost:5606/#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="http://localhost:5606/#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"number of unique transcript_ids:"</span>,<span class="bu">len</span>(<span class="bu">set</span>(chr3[<span class="st">"Transcript stable ID"</span>])))</span>
+<span id="cb3-4"><a href="http://localhost:5606/#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="http://localhost:5606/#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"number of unique Exon_ids:"</span>,<span class="bu">len</span>(<span class="bu">set</span>(chr3[<span class="st">"Exon stable ID"</span>])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>number of unique gene_ids: 4073
+number of unique transcript_ids: 14364
+number of unique Exon_ids: 38328</code></pre>
+</div>
+</div>
+<section id="genes-to-transcripts-is-a-one-to-many-relationship" class="level4">
+<h4 class="anchored" data-anchor-id="genes-to-transcripts-is-a-one-to-many-relationship"><strong>Genes to transcripts is a one to many relationship</strong><a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="http://localhost:5606/#genes-to-transcripts-is-a-one-to-many-relationship" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>Each Transcript corresponds to one gene</p>
+<p>But each gene can have many transcripts</p>
+<div id="8b8dc897" class="cell" data-execution_count="40">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="http://localhost:5606/#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"max number of genes a transcript can have: "</span>,chr3.groupby(<span class="st">"Transcript stable ID"</span>)[<span class="st">"Gene stable ID"</span>].nunique().<span class="bu">max</span>())</span>
+<span id="cb5-2"><a href="http://localhost:5606/#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"max number of transcripts a gene can have: "</span>,chr3.groupby(<span class="st">"Gene stable ID"</span>)[<span class="st">"Transcript stable ID"</span>].nunique().<span class="bu">max</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>max number of genes a transcript can have:  1
+max number of transcripts a gene can have:  244</code></pre>
+</div>
+</div>
+</section>
+<section id="transcripts-to-exons-is-a-many-to-many-relationship" class="level4">
+<h4 class="anchored" data-anchor-id="transcripts-to-exons-is-a-many-to-many-relationship"><strong>Transcripts to Exons is a many to many relationship</strong><a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="" href="http://localhost:5606/#transcripts-to-exons-is-a-many-to-many-relationship" style="font: 1em / 1 anchorjs-icons; margin-left: 0.1875em; padding-right: 0.1875em; padding-left: 0.1875em;"></a></h4>
+<p>Each Transcript corresponds has many Exons</p>
+<p>But each Exon can be part of many distinct Transcripts</p>
+<p><strong>Hence, a joining table is appropriate to represent this</strong></p>
+<div id="07672fff" class="cell" data-execution_count="41">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="http://localhost:5606/#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"max number of Exons a transcript can have: "</span>,chr3.groupby(<span class="st">"Transcript stable ID"</span>)[<span class="st">"Exon stable ID"</span>].nunique().<span class="bu">max</span>())</span>
+<span id="cb7-2"><a href="http://localhost:5606/#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"max number of transcripts a Exon can have (be a part of): "</span>,chr3.groupby(<span class="st">"Exon stable ID"</span>)[<span class="st">"Transcript stable ID"</span>].nunique().<span class="bu">max</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>max number of Exons a transcript can have:  86
+max number of transcripts a Exon can have (be a part of):  150</code></pre>
+</div>
+</div>
+<p>Each exon has ONLY one exon start and one end</p>
+<p>But each transcript has many exon start and ends</p>
+<p><strong>Therefore, as the Exon Start and End only tell you about the specific exon, we should put these in the exon table</strong></p>
+<p>…as per the third normal form in relational database theory (Kent, 1983)</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./Database_Analysis_Planning_files/7e63c889-1-image.png" class="img-fluid figure-img"></p>
+<figcaption>image.png</figcaption>
+</figure>
+</div>
+<div id="8d6213e4" class="cell" data-execution_count="42">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="http://localhost:5606/#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"max number of start positions an exon can have:"</span>,chr3.groupby(<span class="st">"Exon stable ID"</span>)[<span class="st">"Exon region start (bp)"</span>].nunique().<span class="bu">max</span>())</span>
+<span id="cb9-2"><a href="http://localhost:5606/#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"max number of end positions an exon can have:"</span>,chr3.groupby(<span class="st">"Exon stable ID"</span>)[<span class="st">"Exon region end (bp)"</span>].nunique().<span class="bu">max</span>())</span>
+<span id="cb9-3"><a href="http://localhost:5606/#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb9-4"><a href="http://localhost:5606/#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"As you may expect, each transcript can have many exon start positions:"</span>, chr3.groupby(<span class="st">"Transcript stable ID"</span>)[<span class="st">"Exon region start (bp)"</span>].nunique().<span class="bu">max</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>max number of start positions an exon can have: 1
+max number of end positions an exon can have: 1
+
+As you may expect, each transcript can have many exon start positions: 86</code></pre>
+</div>
+</div>
+<p><strong>Exon rank in transcript describes BOTH an EXON and a TRANSCRIPT therefore it belongs in the joining table.</strong></p>
+<p>Because a transcript has many exons its part of, and an exon can have many transcripts it’s part of</p>
+<p>…as per the second normal form in relational database theory (Kent, 1983)</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./Database_Analysis_Planning_files/70ac6b60-1-image.png" class="img-fluid figure-img"></p>
+<figcaption>image.png</figcaption>
+</figure>
+</div>
+<div id="6f626b46" class="cell" data-execution_count="43">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="http://localhost:5606/#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"max number of Exon ranks a transcript can have:"</span>, chr3.groupby(<span class="st">"Transcript stable ID"</span>)[<span class="st">"Exon rank in transcript"</span>].nunique().<span class="bu">max</span>())</span>
+<span id="cb11-2"><a href="http://localhost:5606/#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"max number of Exon ranks an exon can have:"</span>, chr3.groupby(<span class="st">"Exon stable ID"</span>)[<span class="st">"Exon rank in transcript"</span>].nunique().<span class="bu">max</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>max number of Exon ranks a transcript can have: 86
+max number of Exon ranks an exon can have: 9</code></pre>
+</div>
+</div>
+<p><strong>By process of elimination, and because one transcript always belongs to one gene, these are the fields in the transcripts table</strong></p>
+<p>This is a slightly sparse table, it would be typical to have something like <code>transcript name</code> in there, but we’ve not been given this…</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./Database_Analysis_Planning_files/a858b0a9-1-image.png" class="img-fluid figure-img"></p>
+<figcaption>image.png</figcaption>
+</figure>
+</div>
+<p>But this design eliminates redundancy, and is actually similar to that which is used by ENSEMBL</p>
+<p>https://jun2026.archive.ensembl.org/info/docs/api/core/diagrams/Core.fundamental_tables.svg</p>
+<hr>
+</section>
+</section>
+<section id="re-organised-the-human-disease-genes" class="level1">
+<h1>2. Re-organised the Human Disease Genes</h1>
+<div id="fcce7e20" class="cell" data-execution_count="44">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="http://localhost:5606/#cb13-1" aria-hidden="true" tabindex="-1"></a>disease <span class="op">=</span> pd.read_csv(<span class="st">"../data/Disease_information.txt"</span>,delimiter<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span>, skiprows<span class="op">=</span><span class="dv">18</span>,header<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb13-2"><a href="http://localhost:5606/#cb13-2" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> [<span class="st">"Human Gene Symbol"</span>,<span class="st">"Human Gene Name"</span>,<span class="st">"HGNC ID for human gene"</span>,<span class="st">"DO term name associated with human gene"</span>,<span class="st">"DO term ID associated with human gene"</span>,<span class="st">"Mouse genotype IDs associated with DO term"</span>,<span class="st">"Mouse Gene"</span>,<span class="st">"MGI Mouse Gene ID"</span>]</span>
+<span id="cb13-3"><a href="http://localhost:5606/#cb13-3" aria-hidden="true" tabindex="-1"></a>disease.columns <span class="op">=</span> cols</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Genes can be associated with many Diseases</strong></p>
+<p><strong>Diseases can be associated with many Genes</strong></p>
+<p>It is a many to many relationship, therefore it is a good idea to use a joining table here.</p>
+<div id="db87f517" class="cell" data-execution_count="45">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="http://localhost:5606/#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Max number of diseases a GENE can be associated with: "</span>,disease.groupby(<span class="st">"HGNC ID for human gene"</span>)[<span class="st">"DO term ID associated with human gene"</span>].nunique().<span class="bu">max</span>())</span>
+<span id="cb14-2"><a href="http://localhost:5606/#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Max number of genes a disease can be associated with: "</span>,disease.groupby(<span class="st">"DO term ID associated with human gene"</span>)[<span class="st">"Human Gene Symbol"</span>].nunique().<span class="bu">max</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Max number of diseases a GENE can be associated with:  87
+Max number of genes a disease can be associated with:  173</code></pre>
+</div>
+</div>
+<p>This table only contains genes where there is a 1:1 relationship between humans and mice</p>
+<p>For this, we don’t need to worry about possible many-to-many relationships. BUT for our bespoke task, we will need to make an orthologs table (see next section)</p>
+<p>For this reason, the Mouse and Human genes are connected via the ortholog table, which is connected to the disease genes table. - This removes the need to store human_gene_id and mouse_gene_id in the disease genes joining table, and it comes with benefits for the following bespoke task. - This prevents us from adding human disease genes with no corresponding mouse gene, but this wouldnt make sense given we’re trying to look at relationships between humans and mouse models - The design still depends on there being 1:1 orthology between human and mouse disease genes because we’d have a lot of duplication if we began adding non-1:1 genes (i.e., for genes with 1 human copy and many mouse copies).</p>
+<ul>
+<li><p>Looking up human disease genes needs one join through the orthologs table. If this became a bottleneck, an index or view would be the first step. Copying gene IDs into the disease-genes table would speed queries further but risks inconsistency.</p></li>
+<li><p>So in future, it is possible that adding human_gene_id and mouse_gene_id to the disease_genes table (alongside ortholog_id) could improve query speed. But as this would be relatively easy to implement, and isnt necessary for our current data, I’ve ommited this.</p></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./Database_Analysis_Planning_files/1c964710-1-image.png" class="img-fluid figure-img"></p>
+<figcaption>image.png</figcaption>
+</figure>
+</div>
+<div id="e7147641" class="cell" data-execution_count="46">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="http://localhost:5606/#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Max number of diseases a GENE can be associated with: "</span>,disease.groupby(<span class="st">"HGNC ID for human gene"</span>)[<span class="st">"MGI Mouse Gene ID"</span>].nunique().<span class="bu">max</span>())</span>
+<span id="cb16-2"><a href="http://localhost:5606/#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Max number of genes a disease can be associated with: "</span>,disease.groupby(<span class="st">"MGI Mouse Gene ID"</span>)[<span class="st">"HGNC ID for human gene"</span>].nunique().<span class="bu">max</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Max number of diseases a GENE can be associated with:  1
+Max number of genes a disease can be associated with:  1</code></pre>
+</div>
+</div>
+<p><strong>I made a table specifically for holding the different mouse genotypes, and the human disease ontology term IDs that they represent</strong></p>
+<p>This is to ensure the atomicity of the database (first normal form of relational databases)</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./Database_Analysis_Planning_files/231e5982-1-image.png" class="img-fluid figure-img"></p>
+<figcaption>image.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="incorporating-the-bespoke-task-data-into-our-db" class="level1">
+<h1>3. Incorporating the bespoke task data into our DB</h1>
+<blockquote class="blockquote">
+<p>The task requires us to accomodate many more genes from other chromosomes (e.g., one of the genes in the bespoke task table, Gm13102 [MGI:3703005] which is located on mouse chromosome 4)</p>
+</blockquote>
+<ul>
+<li><p>We have also been told that the DB will likely need data from other chromosomes too. Luckily this is no problem with the design I already implemented</p></li>
+<li><p>We also need to accomodate data on the phenotypes</p></li>
+<li><p>We also should expect that more data fields such as <code>Human phenotype name</code> and <code>Human phenotype description</code> will be added in the future. As such we need to make the DB flexible too</p></li>
+</ul>
+<div id="bddd55f0" class="cell" data-execution_count="47">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="http://localhost:5606/#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Loading in the human phenotype DF</span></span>
+<span id="cb18-2"><a href="http://localhost:5606/#cb18-2" aria-hidden="true" tabindex="-1"></a>hp_dat <span class="op">=</span> pd.read_csv(<span class="st">"../data/bespokeTask.txt"</span>,delimiter<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span>,header<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb18-3"><a href="http://localhost:5606/#cb18-3" aria-hidden="true" tabindex="-1"></a>hp_dat.columns <span class="op">=</span> [<span class="st">"Human Marker Symbol"</span>,<span class="st">"Human Entrez Gene ID"</span>, <span class="st">"Mouse Marker Symbol"</span>,<span class="st">"MGI Marker Accession ID"</span>,<span class="st">"High-level Mammalian Phenotype ID"</span>,<span class="st">""</span>]</span>
+<span id="cb18-4"><a href="http://localhost:5606/#cb18-4" aria-hidden="true" tabindex="-1"></a>hp_dat.drop(<span class="st">""</span>,axis<span class="op">=</span><span class="dv">1</span>,inplace<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="de244d61" class="cell" data-execution_count="48">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="http://localhost:5606/#cb19-1" aria-hidden="true" tabindex="-1"></a>hp_dat</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="48">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Human Marker Symbol</th>
+<th data-quarto-table-cell-role="th">Human Entrez Gene ID</th>
+<th data-quarto-table-cell-role="th">Mouse Marker Symbol</th>
+<th data-quarto-table-cell-role="th">MGI Marker Accession ID</th>
+<th data-quarto-table-cell-role="th">High-level Mammalian Phenotype ID</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>A1BG</td>
+<td>1</td>
+<td>A1bg</td>
+<td>MGI:2152878</td>
+<td>...</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>A1CF</td>
+<td>29974</td>
+<td>A1cf</td>
+<td>MGI:1917115</td>
+<td>MP:0005367, MP:0005369, MP:0005370, MP:000537...</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>A2M</td>
+<td>2</td>
+<td>A2m</td>
+<td>MGI:2449119</td>
+<td>...</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>A3GALT2</td>
+<td>127550</td>
+<td>A3galt2</td>
+<td>MGI:2685279</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>A4GALT</td>
+<td>53947</td>
+<td>A4galt</td>
+<td>MGI:3512453</td>
+<td>MP:0005376, MP:0005386, MP:0010768 ...</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">...</th>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">28875</th>
+<td>ZYG11A</td>
+<td>440590</td>
+<td>Zyg11a</td>
+<td>MGI:2446208</td>
+<td>...</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">28876</th>
+<td>ZYG11B</td>
+<td>79699</td>
+<td>Zyg11b</td>
+<td>MGI:2685277</td>
+<td>MP:0005386, MP:0010768 ...</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">28877</th>
+<td>ZYX</td>
+<td>7791</td>
+<td>Zyx</td>
+<td>MGI:103072</td>
+<td>MP:0005384 ...</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">28878</th>
+<td>ZZEF1</td>
+<td>23140</td>
+<td>Zzef1</td>
+<td>MGI:2444286</td>
+<td>MP:0001186, MP:0005367, MP:0005376, MP:000537...</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">28879</th>
+<td>ZZZ3</td>
+<td>26009</td>
+<td>Zzz3</td>
+<td>MGI:1920453</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+
+<p>28880 rows × 5 columns</p>
+</div>
+</div>
+</div>
+<p><strong>We can add entrez IDs directly to our human_genes table using the HUGO symbols since these already map 1:1</strong></p>
+<div id="209a71bd" class="cell" data-execution_count="49">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="http://localhost:5606/#cb20-1" aria-hidden="true" tabindex="-1"></a>display(hp_dat[[<span class="st">"Human Entrez Gene ID"</span>,<span class="st">"Human Marker Symbol"</span>]].head())</span>
+<span id="cb20-2"><a href="http://localhost:5606/#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="http://localhost:5606/#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(hp_dat.groupby(<span class="st">"Human Entrez Gene ID"</span>)[<span class="st">"Human Marker Symbol"</span>].nunique().<span class="bu">max</span>())</span>
+<span id="cb20-4"><a href="http://localhost:5606/#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(hp_dat.groupby(<span class="st">"Human Marker Symbol"</span>)[<span class="st">"Human Entrez Gene ID"</span>].nunique().<span class="bu">max</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Human Entrez Gene ID</th>
+<th data-quarto-table-cell-role="th">Human Marker Symbol</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>1</td>
+<td>A1BG</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>29974</td>
+<td>A1CF</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>2</td>
+<td>A2M</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>127550</td>
+<td>A3GALT2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>53947</td>
+<td>A4GALT</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1
+1</code></pre>
+</div>
+</div>
+<p>Same goes for the mouse_genes and the MGI_ids</p>
+<div id="c359b014" class="cell" data-execution_count="50">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="http://localhost:5606/#cb22-1" aria-hidden="true" tabindex="-1"></a>display(hp_dat[[<span class="st">"Mouse Marker Symbol"</span>,<span class="st">"MGI Marker Accession ID"</span>]].head())</span>
+<span id="cb22-2"><a href="http://localhost:5606/#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="http://localhost:5606/#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(hp_dat.groupby(<span class="st">"Mouse Marker Symbol"</span>)[<span class="st">"MGI Marker Accession ID"</span>].nunique().<span class="bu">max</span>())</span>
+<span id="cb22-4"><a href="http://localhost:5606/#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(hp_dat.groupby(<span class="st">"MGI Marker Accession ID"</span>)[<span class="st">"Mouse Marker Symbol"</span>].nunique().<span class="bu">max</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Mouse Marker Symbol</th>
+<th data-quarto-table-cell-role="th">MGI Marker Accession ID</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>A1bg</td>
+<td>MGI:2152878</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>A1cf</td>
+<td>MGI:1917115</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>A2m</td>
+<td>MGI:2449119</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>A3galt2</td>
+<td>MGI:2685279</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>A4galt</td>
+<td>MGI:3512453</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1
+1</code></pre>
+</div>
+</div>
+<p>HOWEVER there is a problem, we can see that there are orthologous relationships between the human and mouse genes</p>
+<p>Here we can see that there are orthologous relationships between the human and mouse genes in the human phenotypes dataset</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./Database_Analysis_Planning_files/cd333b64-1-image.png" class="img-fluid figure-img"></p>
+<figcaption>image.png</figcaption>
+</figure>
+</div>
+<p>Luckily, with our orthologs table, these are handled well, reducing redundancy</p>
+<p><strong>Finally, we add the high-level mammalian phenotypes.</strong></p>
+<p>As with the genotypes before, we have to break these up into atomised data (first normal form of relational databases)</p>
+<div id="d9a5bd44" class="cell" data-execution_count="51">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="http://localhost:5606/#cb24-1" aria-hidden="true" tabindex="-1"></a>hp_dat[[<span class="st">"High-level Mammalian Phenotype ID"</span>]].head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="51">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">High-level Mammalian Phenotype ID</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>...</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>MP:0005367, MP:0005369, MP:0005370, MP:000537...</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>...</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>...</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>MP:0005376, MP:0005386, MP:0010768 ...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="inspect-the-impc-dataset" class="level1">
+<h1>Inspect the IMPC dataset</h1>
+<div id="7eeb8fe2" class="cell" data-execution_count="52">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="http://localhost:5606/#cb25-1" aria-hidden="true" tabindex="-1"></a>impc <span class="op">=</span> pd.read_csv(<span class="st">"../Results/Cleaned_Data/Clean_names.csv"</span>,)</span>
+<span id="cb25-2"><a href="http://localhost:5606/#cb25-2" aria-hidden="true" tabindex="-1"></a>impc <span class="op">=</span> impc.loc[:, <span class="op">~</span>impc.columns.<span class="bu">str</span>.contains(<span class="st">'^Unnamed'</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Unfortunately, although this isnt actually how IMPC actually collects tissue expression data, our database will have to tie the tissue expression data back to an individual analysis, despite this being very redundant.</strong></p>
+<p>In reality, IMPC performs this experiment for at LEAST 1 male or 1 female heterozygote (though this implies sometimes they do both).</p>
+<p>This may explain why the same tissue has different expression values for the same gene in the same strain, life_stage and gene.</p>
+<p><code>**Put simply, the problem is that most tissue readings are one-to-one for a given gene in a given strain in a given life-stage, but because some are many-to-many and we have no access to the sex or zygosity of the mice, we have to treat all of this data like its many-to-many**</code></p>
+<p>We may however account for this in the analysis</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./Database_Analysis_Planning_files/7bc466f4-1-image.png" class="img-fluid figure-img"></p>
+<figcaption>image.png</figcaption>
+</figure>
+</div>
+<p>As you can see, most of these are unique</p>
+<div id="f970870e" class="cell" data-execution_count="53">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="http://localhost:5606/#cb26-1" aria-hidden="true" tabindex="-1"></a>tissue_cols <span class="op">=</span> [col <span class="cf">for</span> col <span class="kw">in</span> impc.columns <span class="cf">if</span> re.search(<span class="vs">r"lacz</span><span class="op">*</span><span class="vs">"</span>,col)]</span>
+<span id="cb26-2"><a href="http://localhost:5606/#cb26-2" aria-hidden="true" tabindex="-1"></a>impc.groupby([<span class="st">"strain_name"</span>,<span class="st">"mouse_life_stage"</span>,<span class="st">"gene_accession_id"</span>])[tissue_cols].nunique().value_counts()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="53">
+<pre><code>lacz_blood  lacz_brain  lacz_colon  lacz_eye  lacz_heart  lacz_kidney  lacz_liver  lacz_lung  lacz_skeletal_muscle  lacz_skin  lacz_vascular_system
+1           1           1           1         1           1            1           1          1                     1          1                       3688
+2           1           2           1         1           1            1           1          1                     1          1                         39
+1           1           1           1         1           2            1           1          1                     1          1                         15
+2           1           2           1         1           2            1           1          1                     1          1                         14
+1           1           1           1         1           1            0           1          1                     1          1                         12
+                                                                                                                                                       ... 
+3           2           3           2         2           2            2           2          2                     2          2                          1
+                                    4         3           2            2           2          4                     2          4                          1
+                                    2         3           2            2           2          4                     2          4                          1
+                        4           4         3           3            3           3          3                     3          3                          1
+                                              4           3            3           4          4                     3          4                          1
+Name: count, Length: 187, dtype: int64</code></pre>
+</div>
+</div>
+<p>See here the <code>lacz_kidney</code> has either ambiguous expression or no expression in some columns, but its not possible to tell which came from which analysis, even though these are not repeated measurements.</p>
+<div id="94f401fb" class="cell" data-execution_count="54">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="http://localhost:5606/#cb28-1" aria-hidden="true" tabindex="-1"></a>impc[(impc[<span class="st">"strain_name"</span>] <span class="op">==</span> <span class="st">"B6Brd;B6Dnk;B6N-Tyr&lt;c-Brd&gt;"</span>) <span class="op">&amp;</span> (impc[<span class="st">"mouse_life_stage"</span>] <span class="op">==</span> <span class="st">"Early adult"</span>) <span class="op">&amp;</span> (impc[<span class="st">"gene_accession_id"</span>] <span class="op">==</span> <span class="st">"MGI:105313"</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="54">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">analysis_id</th>
+<th data-quarto-table-cell-role="th">gene_accession_id</th>
+<th data-quarto-table-cell-role="th">gene_symbol</th>
+<th data-quarto-table-cell-role="th">strain_name</th>
+<th data-quarto-table-cell-role="th">mouse_life_stage</th>
+<th data-quarto-table-cell-role="th">parameter_stable_id</th>
+<th data-quarto-table-cell-role="th">parameter_name</th>
+<th data-quarto-table-cell-role="th">p_value</th>
+<th data-quarto-table-cell-role="th">allele_symbol</th>
+<th data-quarto-table-cell-role="th">lacz_blood</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">lacz_colon</th>
+<th data-quarto-table-cell-role="th">lacz_eye</th>
+<th data-quarto-table-cell-role="th">lacz_heart</th>
+<th data-quarto-table-cell-role="th">lacz_kidney</th>
+<th data-quarto-table-cell-role="th">lacz_liver</th>
+<th data-quarto-table-cell-role="th">lacz_lung</th>
+<th data-quarto-table-cell-role="th">lacz_skeletal_muscle</th>
+<th data-quarto-table-cell-role="th">lacz_skin</th>
+<th data-quarto-table-cell-role="th">lacz_vascular_system</th>
+<th data-quarto-table-cell-role="th">file</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">1216</th>
+<td>an1399312984</td>
+<td>MGI:105313</td>
+<td>Cit</td>
+<td>B6Brd;B6Dnk;B6N-Tyr&lt;c-Brd&gt;</td>
+<td>Early adult</td>
+<td>MGP_ALZ_085_001</td>
+<td>Eye</td>
+<td>1</td>
+<td>Cit&lt;tm1a(KOMP)Wtsi&gt;</td>
+<td>No data</td>
+<td>...</td>
+<td>No data</td>
+<td>no expression</td>
+<td>no expression</td>
+<td>ambiguous</td>
+<td>no expression</td>
+<td>no expression</td>
+<td>No data</td>
+<td>no expression</td>
+<td>No data</td>
+<td>an1399312984.csv</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">2086</th>
+<td>an1677238140</td>
+<td>MGI:105313</td>
+<td>Cit</td>
+<td>B6Brd;B6Dnk;B6N-Tyr&lt;c-Brd&gt;</td>
+<td>Early adult</td>
+<td>MGP_ALZ_092_001</td>
+<td>Oviduct</td>
+<td>1</td>
+<td>Cit&lt;tm1a(KOMP)Wtsi&gt;</td>
+<td>No data</td>
+<td>...</td>
+<td>No data</td>
+<td>no expression</td>
+<td>no expression</td>
+<td>no expression</td>
+<td>NaN</td>
+<td>no expression</td>
+<td>No data</td>
+<td>no expression</td>
+<td>No data</td>
+<td>an1677238140.csv</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">13567</th>
+<td>an5508437176</td>
+<td>MGI:105313</td>
+<td>Cit</td>
+<td>B6Brd;B6Dnk;B6N-Tyr&lt;c-Brd&gt;</td>
+<td>Early adult</td>
+<td>MGP_ALZ_109_001</td>
+<td>Pancreas</td>
+<td>1</td>
+<td>Cit&lt;tm1a(KOMP)Wtsi&gt;</td>
+<td>No data</td>
+<td>...</td>
+<td>No data</td>
+<td>no expression</td>
+<td>no expression</td>
+<td>ambiguous</td>
+<td>no expression</td>
+<td>no expression</td>
+<td>No data</td>
+<td>no expression</td>
+<td>No data</td>
+<td>an5508437176.csv</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">14556</th>
+<td>an5858006043</td>
+<td>MGI:105313</td>
+<td>Cit</td>
+<td>B6Brd;B6Dnk;B6N-Tyr&lt;c-Brd&gt;</td>
+<td>Early adult</td>
+<td>MGP_ALZ_-089_001</td>
+<td>Lymph Node</td>
+<td>1</td>
+<td>Cit&lt;tm1a(KO^MP)Wtsi&gt;</td>
+<td>No data</td>
+<td>...</td>
+<td>No data</td>
+<td>no expression</td>
+<td>NaN</td>
+<td>no expression</td>
+<td>no expression</td>
+<td>no expression</td>
+<td>No data</td>
+<td>no expression</td>
+<td>No data</td>
+<td>an5858006043.csv</td>
+</tr>
+</tbody>
+</table>
+
+<p>4 rows × 21 columns</p>
+</div>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+
+<script>
+  window.backupDefine = window.define;
+  window.define = undefined;
+</script>
+<script type="text/javascript" src="./Database_Analysis_Planning_files/quarto-preview.js.download"></script>
+<script>
+  window.define = window.backupDefine;
+  window.backupDefine = undefined;
+</script>
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    window.QuartoPreview.init({
+      origin: "http://localhost:5606",
+      search: "?quartoPreviewReqId=1795123846741&amp;quartoPreviewThemeCategory=dark",
+      inputFile: "C:\Users\Tim\OneDrive\__MScBioinformatics\5_DataCleaning\_Assignment\+Myfiles\Inspect_data_d2 copy.ipynb",
+      isPresentation: false
+    });
+  })
+</script>
+<div><div dir="ltr" class="fui-FluentProvider fui-FluentProviderr0 ___jdtuxv0 f19n0e5 fxugw4r f1o700av fk6fouc fkhj508 figsok6 f1i3iumi"></div></div><i tabindex="0" role="none" data-tabster-dummy="" aria-hidden="true" style="position: fixed; height: 1px; width: 1px; opacity: 0.001; z-index: -1; content-visibility: hidden; top: 0px; left: 0px;"></i></body><grammarly-desktop-integration data-grammarly-shadow-root="true" style="visibility: visible !important;"><template shadowrootmode="open"><style>
+      div.grammarly-desktop-integration {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select:none;
+        user-select:none;
+      }
+
+      div.grammarly-desktop-integration:before {
+        content: attr(data-content);
+      }
+    </style><div aria-label="grammarly-integration" role="group" tabindex="-1" class="grammarly-desktop-integration" data-content="{&quot;mode&quot;:&quot;limited&quot;,&quot;isActive&quot;:false,&quot;isUserDisabled&quot;:false}"></div></template></grammarly-desktop-integration></html>
