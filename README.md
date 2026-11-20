@@ -25,10 +25,13 @@
 
    > Should cluster genes for similar phenotype scores
 
-5. Store all scripts and a database backup (.dump) file on GitHub. ``(all - deadline TBC)``
-6. Write a <100 word author contribution statement (look up author contribution statements on standard scientific publications.. write in this style) ``(all - deadline TBC)`` 
+5. Store all scripts and a database backup (.dump) file on GitHub. ``(all - deadline: 3rd December (4pm)
+)``
+6. Write a <100 word author contribution statement (look up author contribution statements on standard scientific publications.. write in this style) ``(all - deadline: 3rd December (4pm)
+)`` 
 7. Individual report 
-   - 1500 words ``(all - deadline TBC)``
+   - 1500 words ``(all - deadline: 3rd December (4pm)
+)``
 
 
 
