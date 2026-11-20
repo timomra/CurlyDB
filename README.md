@@ -4,7 +4,7 @@
 
 ## **Noticeboard:**
 
-> DUE DATE: 1st December (will update if this changes)
+> DUE DATE: 3rd December (4pm)
 
 - If anyone needs help, message the group chat we're all happy to help :)
 - Please let us know if you you need extensions on deadlines
