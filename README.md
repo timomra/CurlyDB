@@ -1,6 +1,10 @@
 # CurlyDB
 
-<img src="https://www.shutterstock.com/image-vector/cute-mouse-cartoon-character-holding-260nw-2650301033.jpg" alt="Cute Mouse Cartoon Character Holding Cheese Stock Vector (Royalty Free)  2650301033 | Shutterstock" style="zoom:33%;" />
+
+![CurlyDB logo](./Scripts/Dashboard/Images/CurlyMouseBig.png)
+
+
+
 
 ---
 
