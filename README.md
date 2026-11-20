@@ -1,7 +1,7 @@
 # CurlyDB
 
 
-![CurlyDB logo](./Scripts/Dashboard/Images/CurlyMouseBig.png)
+![CurlyDB logo](/Scripts/Dashboard/Images/CurlyMouseBig.png)
 
 
 
