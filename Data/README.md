@@ -14,7 +14,7 @@ As such we used:
 
 **As the  `statistical-results-ALL.csv` is very large, I trimmed it down with the following command before loading it into Rstudio**
 
-``python -m csvkit.utilities.csvcut -c parameter_stable_id,p_value,significant statistical-results-ALL.csv > statistical-results-brief.csv``
+``python -m csvkit.utilities.csvcut -c <selected column headers> statistical-results-ALL.csv > statistical-results-brief.csv``
 
 
 
