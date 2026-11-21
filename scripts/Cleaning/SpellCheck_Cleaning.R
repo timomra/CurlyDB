@@ -225,8 +225,8 @@ remove(missing_alleles)
 
 # The complete list of parameter stable IDs used by the IMPC
 # Source: https://ftp.ebi.ac.uk/pub/databases/impc/all-data-releases/release-25.0/results/ 
-
 stat_resuls <- read.csv("Data/statistical-results-brief.csv")
+
 
 # View a table of characters that are used in the IMPC parameter IDs 
 allowed_param_chars <- table(unlist(strsplit(stat_resuls$parameter_stable_id,"")))
@@ -237,7 +237,7 @@ allowed_param_chars
 names(allowed_param_chars)
 allowed_param_chars_pat <- "[^ \\-_0-9A-Za-z]"  # [^ ] specifies a negated class of characters
 
-sum(!(cleaned_spellings$parameter_stable_id %in% params$parameterId))/nrow(cleaned_spellings)*100
+sum(!(cleaned_spellings$parameter_stable_id %in% parameters$parameterId))/nrow(cleaned_spellings)*100
 
 
 cleaned_spellings <- cleaned_spellings %>%
@@ -252,12 +252,11 @@ cleaned_spellings <- cleaned_spellings %>%
 sum(!(cleaned_spellings$parameter_stable_id %in% stat_resuls$parameter_stable_id))/nrow(cleaned_spellings)*100
 
 
-# HOWEVER Around 33% of these corrected IDs do not occur in our given dataset.
-params <- read.csv("Data/IMPC_parameter_description.txt")
-params <- params %>%  # cleaned whitespace out of params 
+# HOWEVER Around 23% of these corrected IDs do not occur in our given dataset.
+parameters <- parameters %>%  # cleaned whitespace out of parameters 
   mutate(across(parameterId,trimws))
 
-sum(!(cleaned_spellings$parameter_stable_id %in% params$parameterId))/nrow(cleaned_spellings)*100
+sum(!(cleaned_spellings$parameter_stable_id %in% parameters$parameterId))/nrow(cleaned_spellings)*100
 
 
 # This will be addressed in the subsequent script.
