@@ -2,6 +2,7 @@
 
 A final cleaned Dataframe can be found under `Results/Cleaned_Data`
 
+The scripts should be run in the following order: 
 ---
 
 1. ``Initial_SOP_QualityChecks.R``  Runs the initial quality checks. (By Ella)
