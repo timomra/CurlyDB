@@ -1,11 +1,8 @@
 # CurlyDB
 
-
----
-
 ## **Noticeboard:**
 
-> DUE DATE: 1st December (will update if this changes)
+> DUE DATE: 3rd December (4pm)
 
 - If anyone needs help, message the group chat we're all happy to help :)
 - Please let us know if you you need extensions on deadlines
@@ -26,10 +23,13 @@
 
    > Should cluster genes for similar phenotype scores
 
-5. Store all scripts and a database backup (.dump) file on GitHub. ``(all - deadline TBC)``
-6. Write a <100 word author contribution statement (look up author contribution statements on standard scientific publications.. write in this style) ``(all - deadline TBC)`` 
+5. Store all scripts and a database backup (.dump) file on GitHub. ``(all - deadline: 3rd December (4pm)
+)``
+6. Write a <100 word author contribution statement (look up author contribution statements on standard scientific publications.. write in this style) ``(all - deadline: 3rd December (4pm)
+)`` 
 7. Individual report 
-   - 1500 words ``(all - deadline TBC)``
+   - 1500 words ``(all - deadline: 3rd December (4pm)
+)``
 
 
 
