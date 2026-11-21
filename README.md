@@ -1,11 +1,6 @@
 # CurlyDB
 
 
-![CurlyDB logo](./Scripts/Dashboard/Images/CurlyMouseBig.png)
-
-
-
-
 ---
 
 ## **Noticeboard:**
