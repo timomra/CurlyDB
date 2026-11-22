@@ -51,7 +51,7 @@ dashboardHeader(
         tabName = "Home",
         fluidRow(
           box(
-            imageOutput(outputId = images/CurlyMouse_Big.png)
+            imageOutput(outputId = "images/CurlyMouse_Big.png")
             
           ),
           

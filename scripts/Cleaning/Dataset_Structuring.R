@@ -18,13 +18,69 @@ cleaned_analysis_data <- cleaned_spellings
 
 
 # ================= # 
-# Flag potential duplicates (Melissa)
+# Create a dataset of flagged records.
 # ================= #
+# Now after the spell check cleaning, we locate those files which had the same name to see if they still do.
+
+suffix_indices <- match(suffix_files, cleaned_analysis_data$file)
+original_indices <- match(original_filenames, cleaned_analysis_data$file)
+
+identical_pairs <- vapply(seq_along(suffix_indices), function(i) {
+  identical(
+    unname(as.character(cleaned_analysis_data[suffix_indices[i], analysis_fields])),
+    unname(as.character(cleaned_analysis_data[original_indices[i], analysis_fields]))
+  )
+}, logical(1))
+
+
+# After spell-corrections, only 9 of the records are non-matching duplicates which mostly differ by one field.
+table(identical_pairs)
+
+suffix_files[!identical_pairs]
+
+pair_differences <- lapply(which(!identical_pairs), function(i) {
+  
+  original <- unlist(cleaned_analysis_data[original_indices[i], analysis_fields],
+                     use.names = FALSE)
+  
+  duplicate <- unlist(cleaned_analysis_data[suffix_indices[i], analysis_fields],
+                      use.names = FALSE)
+  
+  # Compare values, treating two missing values as equivalent
+  different <- !(original == duplicate |
+                   (is.na(original) & is.na(duplicate)))
+  
+  different[is.na(different)] <- TRUE
+  
+  # Return the filenames and names of differing fields
+  data.frame(
+    original_file = original_filenames[i],
+    suffix_file = suffix_files[i],
+    differing_fields = paste(analysis_fields[different],
+                             collapse = ", ")
+  )
+})
+
+pair_differences <- do.call(rbind, pair_differences)
+
+
+# Proposed solution (Tim)
+# Drop the 27 duplicates with the same analysis ID and same fields.
+# data_clean <- data_clean[-suffix_indices[identical_pairs],]
+
+pair_differences
+data.frame(pair_differences[1])[,]
+
+c(data.frame(pair_differences[1])[,3])
+
+for (i in 1:length(pair_differences)){
+  print(cleaned_analysis_data[cleaned_analysis_data$file %in% data.frame(pair_differences[i])[,1:2], c(data.frame(pair_differences[i])[,3])])
+}
 
 
 
-
-
+# For the remainder, I will re-evaluate them after running through my 
+# spell-correcting script.
 
 
 # ================= # 

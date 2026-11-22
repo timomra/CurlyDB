@@ -1,0 +1,14 @@
+.gitignore
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
++MyFiles
+misc/
+LS Scripts/Cleaning/Inspect_data.ipynb
+*.Rproj
+*.Rprofile
+_Report
+
+Data/statistical-results-*.csv
+Data/__MACOSX/

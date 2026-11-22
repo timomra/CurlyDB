@@ -139,7 +139,7 @@ mean(stringdist(a=cleaned_spellings$gene_symbol[diff_mask], b=cleaned_spellings$
 
 # Because of this, I simply used this column as the gene names instead
 cleaned_spellings <- cleaned_spellings[,!(names(cleaned_spellings) %in% c("gene_symbol"))]
-# cleaned_spellings <- rename(cleaned_spellings, gene_symbol= Marker.Symbol)
+cleaned_spellings <- rename(cleaned_spellings, gene_symbol= Marker.Symbol)
 
 
 # save memory by removing MGI genes
@@ -263,6 +263,7 @@ sum(!(cleaned_spellings$parameter_stable_id %in% parameters$parameterId))/nrow(c
 # ================= # 
 # Spell_Checks_Complete!
 # ================= #
+
 
 
 

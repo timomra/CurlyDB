@@ -545,18 +545,6 @@ pair_differences
 # No records or analysis identifiers have been modified
 
 
-# Proposed solution (Tim)
-# Drop the 27 duplicates with the same analysis ID and same fields.
-data_clean <- data_clean[-suffix_indices[identical_pairs],]
-
-# For the remainder, I will re-evaluate them after running through my 
-# spell-correcting script.
-
-
-
-
-
-
 
 
 
