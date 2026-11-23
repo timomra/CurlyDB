@@ -12,6 +12,13 @@ library(pheatmap)
 library(igraph)
 
 
+
+# Import the Data
+# ** Replace this with the SQL query
+analysis_Data <- read.csv("Results/Cleaned_Data/Cleaned_Data.csv")
+
+
+
 # Define a function to avoid repeating code.
 rank_order_encodings <- function(col, orderings){
   order <- factor(col,orderings, ordered = TRUE)
@@ -20,18 +27,7 @@ rank_order_encodings <- function(col, orderings){
 }
 
 
-table(analysis_Data$mouse_life_stage)
-
-analysis_Data <- read.csv("Results/Cleaned_Data/Cleaned_Data.csv")
-
-
 lacz_fields <- grep("^lacz_", colnames(analysis_Data), value = TRUE)
-
-
-# analysis_Data$mouse_life_stage_rank <- analysis_Data$mouse_life_stage %>%
-#  rank_order_encodings(c("E9.5","E12.5","E15.5","E18.5","Early adult","Late adult","Middle aged adult"))
-
-
 
 
 # We'll start by keeping it simple and getting tissue expressions independent of lifestage.
@@ -40,6 +36,7 @@ tissue_expression_nolifestage <- analysis_Data[,c("gene_symbol",lacz_fields)] %>
   mutate(across(all_of(lacz_fields),as.character),)
 
 
+table(analysis_Data$mouse_life_stage)
 
 # DELETE_LATER this sets the value for each gene to be the the most common in
 # each column, totally ignoring life stage, which isn't very useful.
@@ -60,14 +57,12 @@ tissue_expression_nolifestage <- tissue_expression_nolifestage %>%
   column_to_rownames("gene_symbol")
 
 
-
 tissue_expression_nolifestage_gowd <- gowdis(tissue_expression_nolifestage,ord = "podani")
 
 
 
-# Currently the challenge is the amount of missing data For this 
-# gow_matrix <- as.matrix(tissue_expression_nolifestage_gowd)[50:30,50:30]
 
+# Currently the challenge is the amount of missing data For this
 gow_matrix <- as.matrix(tissue_expression_nolifestage_gowd)
 
 gow_matrix[is.na(gow_matrix)] <- 1
@@ -84,9 +79,10 @@ pheatmap(gow_matrix)
 
 
 set.seed(67)
+
 gene_expression_tsne <- tsne(gow_matrix,  
-                 k=2 ,  # <- we only want the fist two dimensions of the embedding.
-                 perplexity = 2
+                             k=2 ,  # <- we only want the fist two dimensions of the embedding.
+                             perplexity = 2
 )
 
 
@@ -94,15 +90,12 @@ gene_expression_tsne <- tsne(gow_matrix,
 gow_d <- as.dist(gow_matrix)
 
 
-# K-means clustering
-
-
 
 # Hierarchical clustering
 hclust_tissue_expression <- hclust(gow_d, method = "average")
 plot(hclust_tissue_expression,
-      main="Hierarchical clustering of genes"
-     )
+     main="Hierarchical clustering of genes"
+)
 
 gene_expression_umap <- umap(gow_matrix, input = "dist")
 gene_expression_tsne <- tsne(gow_matrix, k = 2)
@@ -113,8 +106,6 @@ gene_expression_tsne <- tsne(gow_matrix, k = 2)
 
 # Leiden clustering
 gow_graph <- graph_from_adjacency_matrix(gow_matrix, mode = "max",weighted = TRUE)
-
-
 cl <- cluster_leiden(gow_graph,objective_function = "modularity")
 
 # k-means clustering
@@ -141,6 +132,10 @@ ggplot(data.frame(gene_expression_tsne), aes(x=X1,y=X2))+
 
 
 ggplot(df, aes(x=X1,y=X2,color=kmeans_cluster))+
+  geom_point()+
+  labs(title = "UMAP")
+
+ggplot(df, aes(x=X1,y=X2,color=cluster))+
   geom_point()+
   labs(title = "UMAP")
 

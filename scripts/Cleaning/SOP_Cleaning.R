@@ -24,18 +24,7 @@
 
 # 1. Data import and structural validation
 # Import the SOP containing the data validation rules
-sop <- read.csv("Data/IMPC_SOP_2026.csv")
 
-# Identify all CSV files in the correct dataset
-files <- list.files(
-  path = "Data/group13_data",
-  pattern = "\\.csv$",
-  full.names = TRUE,
-  recursive = TRUE
-)
-
-# Confirm the number of CSV files
-length(files)
 
 ## QC result: 26,819 CSV files identified
 
@@ -194,6 +183,7 @@ parsing_errors <- sapply(files, function(file) {
   
   any(is.na(field_counts) | field_counts != 2)
 })
+
 
 # Identify original CSV files with potential parsing problems
 parsing_problem_files <- files[parsing_errors]

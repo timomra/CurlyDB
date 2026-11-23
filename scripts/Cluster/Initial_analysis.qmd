@@ -1,7 +1,6 @@
 # Initial checks of the data
 
 ```{r}
-renv
 library(ggplot2)
 library(dplyr)
 

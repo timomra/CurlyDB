@@ -414,4 +414,9 @@ query_ids[!query_ids$gene_accession_id %in% diseases$mgi_id, ]
 
 
 
+diseases <- read.delim("Data/Disease_information.txt",skip = 18,header = FALSE)
+
+diseases
+
+
 

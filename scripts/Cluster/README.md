@@ -1,8 +1,10 @@
-Clustering methods
-- tSNE, UMAP and PCA (these are dimensionality reduction methods, but we can use them to visualise our clusters)
-- can also use ggtree for hierarchical clustering https://pubmed.ncbi.nlm.nih.gov/32162851/
+# Clustering Scripts
 
-- Leiden graph-clustering method ?
-- k-means
-- hierarchical
-- **Concensus clustering** (I believe this one was only available in R until recently, so it could also be good to discuss in the reports)
+`Distance.R` - Computes a distance matrix data which is cached in `results/ClusterDistances` to improve speed of the shiny interface.
+
+
+
+``
+
+
+
