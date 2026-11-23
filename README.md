@@ -1,5 +1,15 @@
 # CurlyDB
 
+`renv`
+
+To ensure reproducibility, I've created a renv environment so that our collaborator can use the exact same R and Package versions as us 
+
+[Is it a good practice to push renv folder and renv.lock file to github along with other files - General - Posit Community](https://forum.posit.co/t/is-it-a-good-practice-to-push-renv-folder-and-renv-lock-file-to-github-along-with-other-files/151208)
+
+
+
+
+
 ## **Noticeboard:**
 
 > DUE DATE: 3rd December (4pm)
@@ -29,7 +39,7 @@
 )`` 
 7. Individual report 
    - 1500 words ``(all - deadline: 3rd December (4pm)
-)``
+   )``
 
 
 
