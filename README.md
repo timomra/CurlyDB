@@ -9,7 +9,7 @@ To activate the environment, simply open the cloned repo within an R-project and
 
 Then run:
 
-``renv::restore()``
+> ``renv::restore()``
 
 
 
