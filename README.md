@@ -3,15 +3,6 @@
 ### `renv/`
 To ensure reproducibility, we created a renv environment so that our collaborator can use the exact same R and Package versions as us 
 
-To activate the environment, simply open the cloned repo within an R-project and run:
-
-> `renv::activate()`
-
-Then run:
-
-> ``renv::restore()``
-
-
 
 
 
