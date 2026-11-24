@@ -12,18 +12,28 @@ analysis_Data <- read.csv("Results/Cleaned_Data/Cleaned_Data.csv")
 
 parameter_descriptions <- read.csv("Results/Cleaned_Data/Parameters_withGroups.csv")
 
+# Make a fake parameter grouping
+parameter_descriptions$nogroups <- parameter_descriptions$parameterId
+
+
+
 ```
 
 **Number of unique genes in our dataset**
 
 ```{r}
-length(unique(analysis_Data$gene_accession_id))
+
+
+
+
+length(unique(analysis_Data$gene_accession_id)) 
 
 ```
 
 **It seems most genes have around 7 parameters associated with them before grouping.**
 
 ```{r}
+
 params_per_gene <- analysis_Data %>% 
   group_by(gene_accession_id) %>% 
   summarise(
@@ -66,8 +76,6 @@ sig_level <- 0.05
 
 analysis_Data$significant <-  analysis_Data$p_value < sig_level
 
-
-
 mat <- matrix(0,
        nrow = length(unique(analysis_Data$parameter_stable_id)),
        ncol = length(unique(analysis_Data$gene_accession_id))
@@ -78,17 +86,6 @@ mat <- matrix(0,
 colnames(mat) <- unique(analysis_Data$gene_symbol)
 rownames(mat) <- unique(analysis_Data$parameter_stable_id)
 
-
-
-for (gene in unique(analysis_Data$gene_symbol)){
-  gene_data <- analysis_Data[which(analysis_Data$gene_symbol==gene),]
-  a <- na.omit(gene_data$parameter_stable_id[which(gene_data$significant)])
-  mat[a,gene] <- 1
-}
-
-
-
-View(mat)
 
 
 ```

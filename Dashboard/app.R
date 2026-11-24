@@ -14,6 +14,10 @@ library(ggplot2)
 addResourcePath("images", "Images")
 addResourcePath("db","../Database")
 
+source("Query.R")
+source("Eval_Grouping.R")
+phenotype_data_queried = FALSE
+
 ui <-  dashboardPage(
   skin="green",
   # ==============================
@@ -26,6 +30,7 @@ dashboardHeader(
       "CurlyDB",
     )
   ),
+
   
   
   # ==============================
@@ -34,8 +39,11 @@ dashboardHeader(
   dashboardSidebar(
     sidebarMenu(
       menuItem("Home", tabName="Home", icon=icon("book", lib = "glyphicon")),
-      menuItem("PCA_plot", tabName="PCA_plot", icon=icon("tree"))
+      menuItem("Phenotype_Analysis", tabName="Phenotype_Analysis", icon=icon("grain",lib = "glyphicon")),
+      menuItem("Tissue_Analysis", tabName="Tissue_Analysis", icon=icon("eye-open",lib = "glyphicon"))
+      
     )),
+  
   
   
   # ==============================
@@ -43,75 +51,247 @@ dashboardHeader(
   # ==============================
   dashboardBody(
     tabItems(
-      
       # ==============================
       # ========= Home tab ===========
       # ==============================
       tabItem(
         tabName = "Home",
-        fluidRow(
+        fixedRow(
           box(
-            title="Welcome to CurlyDB!",
+            title=h1("Welcome to CurlyDB!"),
             p("Instructions:"),
-            p(paste0(readLines("instructions.txt"))),
-            
+            p("1. (optional*) Select desired significance level and random seed"),
+            p("2. Move to the desired analysis"),
+                        
             tags$img(src = "images/CurlyMouse_Big_white.png", height = "235px",
                      style = "display: block; margin: 0 auto;"),
             
             style="display: block; margin: 0 auto;"
+          ),
+          box(
+            h3("Random Seed"),
+            "This ensures the clustering output is reproducible",
+            br(),
+            br(),
+            numericInput("randomseed", label="Enter any number:", value = 67)
+          ),
+          box(
+            h3("Significance Level"),
+            "We recomend using IMPC's standard cutoff of P < 0.0001",
+            tags$a(href="https://www.mousephenotype.org/help/data-analysis/statistical-analysis/", "(IMPC official website)"),
+            br(),
+            br(),
+            numericInput("randomseed", label="Enter Significance Level:", value = 0.0001)
+          )
+          
+          ),
+        
+        fixedRow(
+          box(
+            title=h3("Database Schema"),            
+            tags$img(src = "db/Schema.svg", height = "350px",
+                     style = "display: block; margin: 0 auto;"),
             
             
           ),
           box(
-            title="Database Schema",            
-            tags$img(src = "db/Schema.svg", height = "250px",
-                     style = "display: block; margin: 0 auto;"),
-            
-            
+            title= h3("Links:"),
+            "Our Github:",
+            tags$a(href="https://github.com/timomra/CurlyDB", "https://github.com/timomra/CurlyDB")
           )
-          )),
+        ) 
+        ),
 
       # ==============================
-      # ========= PCA plot ===========
+      # ==== Phenotype Analysis ======
       # ==============================
       tabItem(
-        tabName = "PCA_plot",
+        tabName = "Phenotype_Analysis",
+        
         fluidRow(
-          box(actionButton("GenPlot","Generate Plot")),
+          # Data Selection
           box(
-            plotOutput("plot1", height = 250)
+            h3(strong("1. Data Selection")),
+            width = 6,
+            # select life stage for analysis
+            checkboxGroupInput("Phenotype_life_stage_selection", label = h4("Mouse Life Stage (Select Multiple to Pool)"), 
+                        choices = list("E9.5"="E9.5","E12.5" = "E12.5","E15.5" = "E15.5","E18.5" = "E18.5","Early adult"="Early adult","Middle aged adult"="Middle aged adult","Late adult"="Late adult"), 
+                        selected = "Early adult"),
             
+            # select grouping method for analysis.
+            selectInput("Param_Grouping", label = h3("Parameter Grouping"),choices = list("No Grouping" = "nogroups"),selected = 1),
+            actionButton("Phenotype_Query", strong("Query Database"), class="btn-success"),
+            verbatimTextOutput("total_records"),
+            verbatimTextOutput("total_genes"),
+            verbatimTextOutput("total_params"),
+            plotOutput("evaluate_groupings", height = 300, width = 450),
             
+            ),
+          
+          
+          box(
+            # Do the distance calculation
+            h3(strong("2. Distance Calculation")),
+            width = 6,
+            
+            selectInput("select", label = ("Select Distance Metric:"), 
+                        choices = list("Jaccard" = 1, "Gower (Podani, 1999)"=2 ,"Bray–Curtis" = 3),
+                        selected = 1),
+            actionButton("Phenotype_distance", strong("Calculate Distances"), class="btn-warning")
+            
+            )
+          
+            
+          ),
+
+        
+        # Results Display
+        fixedRow(
+          height=5000,width=1500,
+          box(
+            h2(strong("3.1 Dimension Reduction")),
+            plotOutput("plot1", height = 500, width = 150)
+          ),
+          box(
+            h2(strong("3.2 Hierarchical Clustering + Heatmap")),
+            plotOutput("plot1", height = 500, width = 150)
+          )
+          
+        ),
+        
+        
+        # Control Pannel
+        fixedRow(
+          box(
+            actionButton("GenPlot",strong("Generate Plot"),class="btn-danger"), 
+            
+            selectInput("select", label = h3("Dimension Reduction"), 
+                        choices = list("UMAP" = 1, "t-SNE" = 2), 
+                        selected = 1),  
+            
+            selectInput("select", label = h3("Clustering"),
+                        choices = list("k-means" = 1, "k-modes" = 2), 
+                        selected = 1),
+            
+            numericInput("k", label=h3("k"), value = 5)
+            
+          ),
+          box(
+            actionButton("GenPlot",strong("Generate Plot"),class="btn-danger"),
+            plotOutput("Grouping_Histogram", height = 500, width = 150)
           )
         )
+      ),
+      
+      # ==============================
+      # ====== Tissue Analysis =======
+      # ==============================
+      tabItem(
+        tabName = "Tissue_Analysis",
         
+        # Data Selection
+        fluidPage(
+          box(
+            width = 14,
+            selectInput("select", label = h4("Mouse Life Stage"), 
+                        choices = list("E9.5"=1,"E12.5" = 2,"E15.5" = 3,"E18.5" = 4,"Early adult"=5,"Middle aged adult"=6,"Late adult"=7), 
+                        selected = 5),
+            selectInput("select", label = h3("Distance Calculation"), 
+                        choices = list("Jaccard" = 1, "Gower (Podani, 1999)"=2 ,"Bray–Curtis" = 3),
+                        selected = 1),
+          ),
+          
+        ),
+        
+        # Results Display
+        fixedRow(
+          height=5000,width=1500,
+          box(
+            h2("Dimension Reduction"),
+            plotOutput("plot1", height = 500, width = 150)
+          ),
+          box(
+            h2("Hierarchical Clustering + Heatmap"),
+            plotOutput("plot1", height = 500, width = 150)
+          )
+          
+          ),
+        
+        # Control Pannel
+        fixedRow(
+          box(
+            actionButton("GenPlot",strong("Generate Plot"),class="btn-danger"),
+ 
+            selectInput("select", label = h3("Dimension Reduction"), 
+                        choices = list("UMAP" = 1, "t-SNE" = 2), 
+                        selected = 1),
+            selectInput("select", label = h3("Clustering"),
+                        choices = list("k-means" = 1, "k-modes" = 2), 
+                        selected = 1),
+            numericInput("k", label=h3("k"), value = 5)
+              ),
+          box(
+            actionButton("GenPlot",strong("Generate Plot"),class="btn-danger"),
+          )
+        )
+        )
       )
-      )))
-
+      )
+)
 
 
 # ============================================================================ #
 # ================================== Server ================================== #
 # ============================================================================ #
 server <- function(input, output, session){
-  # ======= Start the Correct Python environment ========= #
+  # ======= Check and Change the level of Significance === #
   # ====================================================== #
-  ## NOTE: if we do go with this approach, I'll make this a button so it runs more efficiently.
-
-  output$plot1 <- renderPlot({
-    req(input$GenPlot)  # This stops the code its in until the button is pressed
+  
+  
+  
+  
+  # ======= Query and evaluate Phenotype Data ============ #
+  # ====================================================== #  
+  observeEvent(
+    input$Phenotype_Query, # <- Observes the reactive value of the actionbutton.
+    # Runs when the reactive value changes.
+    {
+      # Take inputs from the UI and query the phenotypes data
+      pheno_data <- query_phenotype(
+        life_stages = input$Phenotype_life_stage_selection,
+        param_grouping = input$Param_Grouping)
+      # Evaluate the groupings selected
+      evaluations <- eval_phenogroups(pheno_data,param_grouping)
+      
+      # Output the phenotype data to the screen
+      output$total_records <- renderText({paste("Total Records:",evaluations[1])})
+      output$total_genes <- renderText({paste("Total Genes:",evaluations[2])})
+      output$total_params <- renderText({paste("Total Parameters:",evaluations[3]) })
+      output$evaluate_groupings <- renderPlot(evaluations[4])
+      
+      # Set this parameter to be TRUE so the user can be allowed to do the next step.
+      phenotype_data_queried = TRUE
+    }
+  )
+  
+  # = Calculate a distance matrix for the phenotype data = #
+  # ====================================================== #
+  observeEvent(
+    input$Phenotype_distance,
+    {
+      print("querying the data")
+      
+      
+      
+      
+    }
     
-    pca_iris()
-    })
-  
-  
+    
+    
+  )
   
   
 }
-  
-  
-  
-
 
 
 

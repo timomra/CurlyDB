@@ -1,13 +1,26 @@
 # Import the Functional Diversity Package in R.
 # https://cran.r-project.org/web/packages/FD/refman/FD.html
-# Specifically we're using the Gower dissimilarity (distance) function.
+# Specifically we're using the Gower dissimilarity (distance) function which 
+# implements the method proposed by Podani (1999) for dealing with categorical ordinal variables
 # https://search.r-project.org/CRAN/refmans/FD/html/gowdis.html
 library(FD)
 library(dplyr)
 library(tibble)
-# Import the Data
-# ** Replace this with the SQL query
-analysis_Data <- read.csv("Results/Cleaned_Data/Cleaned_Data.csv")
+
+source("Dashboard/Query.R")
+
+
+life_subset <- query_tissues(c("Early adult"))
+
+
+life_subset
+
+
+
+
+
+
+
 
 
 
@@ -17,6 +30,15 @@ rank_order_encodings <- function(col, orderings){
   order <- factor(col,orderings, ordered = TRUE)
   ranks  <- ordered(as.integer(order))   # <- explicitly casts these as ordered, so that the Gower distance function can know how to handle them.
   return(ranks)
+}
+
+
+
+get_dist_matrix <- function(data_selected_lifestage,selected_fields){
+  analysis_Data[,c("gene_symbol",lacz_fields)] %>%     
+    mutate(across(all_of(lacz_fields),function(x){rank_order_encodings(x,c("no expression","expression"))}),)  %>%   
+    mutate(across(all_of(lacz_fields),as.character),)
+  
 }
 
 
@@ -38,6 +60,8 @@ tissue_expression_nolifestage <- tissue_expression_nolifestage %>%
   summarise(across(all_of(lacz_fields),
                    ~ unique(.x)[which.max(tabulate(match(.x, unique(.x))))]),
             .groups = "drop")
+
+
 
 
 
