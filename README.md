@@ -1,8 +1,21 @@
-# CurlyDB
+# CurlyDB <br>
+<img src="Dashboard/Images/CurlyMouse_Big_blank.png" alt="CurlyMouse" width="200"><br>
+### `Dashboard/`
+
+
+### `Results/`
+> Results of QC checks, Data Cleaning and from dashboard
+
+
+### `Data/`
+> See ``Data/README.md`` for details of external datasets used.
+
+### `Database/`
+> see `[].dump` to download the full database 
 
 ### `renv/`
-To ensure reproducibility, we created a renv environment so that our collaborator can use the exact same R and Package versions as us 
 
+To ensure reproducibility, we created a renv environment so that our collaborator can use the exact same R and Package versions as us.
 
 
 
@@ -38,6 +51,4 @@ To ensure reproducibility, we created a renv environment so that our collaborato
 7. Individual report 
    - 1500 words ``(all - deadline: 3rd December (4pm)
    )``
-
-
 
