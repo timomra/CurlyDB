@@ -1,10 +1,8 @@
 # CurlyDB
 
-`renv`
+### `renv/`
+To ensure reproducibility, we created a renv environment so that our collaborator can use the exact same R and Package versions as us 
 
-To ensure reproducibility, I've created a renv environment so that our collaborator can use the exact same R and Package versions as us 
-
-[Is it a good practice to push renv folder and renv.lock file to github along with other files - General - Posit Community](https://forum.posit.co/t/is-it-a-good-practice-to-push-renv-folder-and-renv-lock-file-to-github-along-with-other-files/151208)
 
 
 

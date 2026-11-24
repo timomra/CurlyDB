@@ -126,16 +126,104 @@ write.csv(cleaned_analysis_data, file="Results/Cleaned_Data/Cleaned_Data.csv")
 # ================= # 
 # Introduce Parameter groupings into the parameter dataset (Ella)
 # ================= #
+# Groups parameters by naming similarity (weight, images, brain) and by test
+# similarity (procedure code in the parameter ID) for the collaborator
+
 # Drop duplicate rows in the parameters df and create a new object to store our 
 # groupings
 parameters_grouped <- unique(parameters)
 
-head(parameters_grouped)
+# One row per parameter: the reference file can list a parameterId several
+# times (one row per impcParameterOrigId), so keep each parameterId once
+parameter_table <- unique(parameters_grouped[, c("parameterId", "name")])
+parameter_table <- parameter_table[!duplicated(parameter_table$parameterId), ]
+names(parameter_table) <- c("parameter_stable_id", "parameter_name")
 
-parameters_grouped$Grouping 
+# Add the parameters that are only in the analysis data (not in the reference file)
+analysis_params <- unique(cleaned_analysis_data[, c("parameter_stable_id", "parameter_name")])
+analysis_params <- analysis_params[!duplicated(analysis_params$parameter_stable_id) &
+                                     !analysis_params$parameter_stable_id %in% parameter_table$parameter_stable_id, ]
+parameter_table <- rbind(parameter_table, analysis_params)
+
+# Groups: matched on the parameter name (naming similarity) or on the
+# procedure code inside the parameter ID (test similarity)
+groups <- data.frame(
+  group_id   = 1:10,
+  group_name = c("weight", "images", "brain", "bone", "heart", "behaviour",
+                 "metabolism", "blood", "eye", "hearing"),
+  match_on   = c("name", "name", "name", rep("id", 7)),
+  pattern    = c("weight", "image", "brain", "_(DXA|XRY)_", "_ECG_", "_(OFD|GRS)_",
+                 "_(IPG|CAL)_", "_(HEM|CBC)_", "_EYE_", "_ABR_"),
+  group_description = c(
+    "Parameters whose name contains 'weight'",
+    "Parameters whose name contains 'image'",
+    "Parameters whose name contains 'brain'",
+    "Body composition (DXA) and X-ray (XRY) procedures",
+    "Electrocardiogram (ECG) procedure",
+    "Open field (OFD) and grip strength (GRS) procedures",
+    "Glucose tolerance (IPG) and indirect calorimetry (CAL) procedures",
+    "Haematology (HEM) and clinical blood chemistry (CBC) procedures",
+    "Eye morphology (EYE) procedure",
+    "Auditory brainstem response (ABR) procedure")
+)
+
+# Parameters that describe how a test was run, not a phenotype (excluded from all groups)
+metadata <- paste(
+  "equipment|experimenter|date|comment|calibrat|manufacturer|model|restrained|strip|pixel",
+  "anaesthe|anesthe|dosage|administration route|time of injection|method|tube|anticoagulant",
+  "storage|kept on ice|sample|sop$|sop |dilution|bleed|fasting|chip card|fight wounds",
+  "mouse status|^alive$|settings|voltage|free ontology|disinfectant|start time|software",
+  "arena size|arena id|arena material|color of arena|height of the wall|light intensity",
+  "light level|noise level|number of animals|type of analysis|zone|definition threshold",
+  "light beam|lightbeam|lead configuration|sampling rate|range of|step size|tone pip",
+  "repetition rate|number averages|recording environment|extension of stimulus",
+  "room temperature|chamber temperature|dimension|height from platform|available space",
+  "infrared|scanning rate|refractory|bedding|igloo|acclimation|dark cycle|duration of test",
+  "upper limit|scheimpflug|sheimpflug|^haw$",
+  sep = "|")
+
+is_metadata <- grepl(metadata, parameter_table$parameter_name, ignore.case = TRUE) |
+  grepl("_EXD_", parameter_table$parameter_stable_id)
+
+# Body weight belongs in the weight group, not the procedure-based groups
+is_body_weight <- grepl("^body weight", parameter_table$parameter_name, ignore.case = TRUE)
+
+# Assign parameters to groups (a parameter can be in more than one group)
+parameter_group_member <- do.call(rbind, lapply(seq_len(nrow(groups)), function(i) {
+  if (groups$match_on[i] == "name") {
+    hit <- grepl(groups$pattern[i], parameter_table$parameter_name, ignore.case = TRUE)
+  } else {
+    hit <- grepl(groups$pattern[i], parameter_table$parameter_stable_id) & !is_body_weight
+  }
+  hit <- hit & !is_metadata
+  data.frame(group_id = groups$group_id[i],
+             parameter_stable_id = parameter_table$parameter_stable_id[hit])
+}))
+
+# Check: parameters per group, and parameters in more than one group
+table(groups$group_name[parameter_group_member$group_id])
+sum(duplicated(parameter_group_member$parameter_stable_id))
+
+# Group lookup table (each group's name and description stored once)
+parameter_group <- groups[, c("group_id", "group_name", "group_description")]
+
+# Add a group_id column to the parameters table. A column holds one group per
+# parameter, so a parameter in two groups keeps the first group listed above
+first_group <- parameter_group_member[!duplicated(parameter_group_member$parameter_stable_id), ]
+parameters_grouped <- merge(parameters_grouped, first_group,
+                            by.x = "parameterId", by.y = "parameter_stable_id", all.x = TRUE)
+
+# Save the parameters table with its group_id column, and the two group tables
+write.csv(parameters_grouped, "Results/Cleaned_Data/Parameters_withGroups.csv", row.names = FALSE)
+write.csv(parameter_group, "Results/Cleaned_Data/Parameter_group.csv", row.names = FALSE)
+write.csv(parameter_group_member, "Results/Cleaned_Data/Parameter_group_member.csv", row.names = FALSE)
+
+# Readable list of each group's parameters, to check by eye
+group_check <- merge(merge(parameter_group_member, parameter_group[, 1:2]), parameter_table)
+write.csv(group_check[order(group_check$group_name), c("group_name", "parameter_stable_id", "parameter_name")],
+          "Results/Cleaned_Data/Parameter_groups_check.csv", row.names = FALSE)
 
 
-write.csv(parameters_grouped,"Results/Cleaned_Data/Parameters_withGroups.csv")
 
 
 # ================= # 
