@@ -14,8 +14,12 @@ library(ggplot2)
 addResourcePath("images", "Images")
 addResourcePath("db","../Database")
 
+
 source("Query.R")
 source("Eval_Grouping.R")
+source("../Scripts/Cluster/Distance.R")
+
+
 phenotype_data_queried = FALSE
 
 ui <-  dashboardPage(
@@ -81,7 +85,7 @@ dashboardHeader(
             tags$a(href="https://www.mousephenotype.org/help/data-analysis/statistical-analysis/", "(IMPC official website)"),
             br(),
             br(),
-            numericInput("randomseed", label="Enter Significance Level:", value = 0.0001)
+            numericInput("Signif_level", label="Enter Significance Level:", value = 0.0001)
           )
           
           ),
@@ -119,7 +123,7 @@ dashboardHeader(
                         selected = "Early adult"),
             
             # select grouping method for analysis.
-            selectInput("Param_Grouping", label = h3("Parameter Grouping"),choices = list("No Grouping" = "nogroups"),selected = 1),
+            selectInput("Param_Grouping", label = h3("Parameter Grouping"),choices = list("No Grouping" = "nogroups"), selected = "nogroups"),
             actionButton("Phenotype_Query", strong("Query Database"), class="btn-success"),
             verbatimTextOutput("total_records"),
             verbatimTextOutput("total_genes"),
@@ -134,10 +138,11 @@ dashboardHeader(
             h3(strong("2. Distance Calculation")),
             width = 6,
             
-            selectInput("select", label = ("Select Distance Metric:"), 
-                        choices = list("Jaccard" = 1, "Gower (Podani, 1999)"=2 ,"Bray–Curtis" = 3),
-                        selected = 1),
-            actionButton("Phenotype_distance", strong("Calculate Distances"), class="btn-warning")
+            selectInput("DistanceChoice", label = ("Select Distance Metric:"), 
+                        choices = list("Jaccard" = "jaccard", "Gower (Symetric Binary)"="gower","Euclidean"="euclidean"),
+                        selected = "gower"),
+            actionButton("Phenotype_distance", strong("Calculate Distances"), class="btn-warning"),
+            verbatimTextOutput("distance_status")
             
             )
           
@@ -156,11 +161,10 @@ dashboardHeader(
             h2(strong("3.2 Hierarchical Clustering + Heatmap")),
             plotOutput("plot1", height = 500, width = 150)
           )
-          
         ),
         
         
-        # Control Pannel
+        # Control Panel
         fixedRow(
           box(
             actionButton("GenPlot",strong("Generate Plot"),class="btn-danger"), 
@@ -200,7 +204,6 @@ dashboardHeader(
                         choices = list("Jaccard" = 1, "Gower (Podani, 1999)"=2 ,"Bray–Curtis" = 3),
                         selected = 1),
           ),
-          
         ),
         
         # Results Display
@@ -257,11 +260,11 @@ server <- function(input, output, session){
     # Runs when the reactive value changes.
     {
       # Take inputs from the UI and query the phenotypes data
-      pheno_data <- query_phenotype(
+      pheno_data <<- query_phenotype(
         life_stages = input$Phenotype_life_stage_selection,
         param_grouping = input$Param_Grouping)
       # Evaluate the groupings selected
-      evaluations <- eval_phenogroups(pheno_data,param_grouping)
+      evaluations <- eval_phenogroups(pheno_data,input$Param_Grouping)
       
       # Output the phenotype data to the screen
       output$total_records <- renderText({paste("Total Records:",evaluations[1])})
@@ -269,8 +272,9 @@ server <- function(input, output, session){
       output$total_params <- renderText({paste("Total Parameters:",evaluations[3]) })
       output$evaluate_groupings <- renderPlot(evaluations[4])
       
-      # Set this parameter to be TRUE so the user can be allowed to do the next step.
-      phenotype_data_queried = TRUE
+      # Set this parameter to be TRUE (in the global namespace)
+      # so the user can be allowed to do the next step.
+      phenotype_data_queried <<- TRUE
     }
   )
   
@@ -279,8 +283,28 @@ server <- function(input, output, session){
   observeEvent(
     input$Phenotype_distance,
     {
-      print("querying the data")
+      if (phenotype_data_queried){
+        # Tell the user that the calculation has started
+        output$distance_status <- renderText({"Calculating distances..... this may take a few seconds"})
+        
+        # Do the calculation
+        pheno_dist_matrix <<- pheno_distmatrix(
+          in_pheno_data = pheno_data,
+          distance = input$DistanceChoice,
+          in_sig_level = input$Signif_level
+          
+          )
+        output$distance_status <- renderText({"Distance Matrix Complete!"})
+        
+        
+
+        }
+      else{
+        output$distance_status <- renderText({"Please Query the Database First!"})
+        
+      }
       
+
       
       
       

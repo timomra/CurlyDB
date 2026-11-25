@@ -12,7 +12,6 @@ library(pheatmap)
 library(igraph)
 
 
-
 # Import the Data
 # ** Replace this with the SQL query
 analysis_Data <- read.csv("Results/Cleaned_Data/Cleaned_Data.csv")
@@ -25,7 +24,6 @@ rank_order_encodings <- function(col, orderings){
   ranks  <- ordered(as.integer(order))   # <- explicitly casts these as ordered, so that the Gower distance function can know how to handle them.
   return(ranks)
 }
-
 
 lacz_fields <- grep("^lacz_", colnames(analysis_Data), value = TRUE)
 
@@ -115,15 +113,14 @@ kmeans <- kmeans(gow_matrix, centers = 4)
 
 
 df <- data.frame(gene_expression_umap$layout)
-df$cluster <- NA
+df$cluster <- NA 
 
 for (i in 1:length(cl)){
   df$cluster[rownames(df) %in% unlist(cl[i])] <- paste0("Leiden_",i)
 }
 
+
 df$kmeans_cluster <- factor(kmeans$cluster[rownames(df)])
-
-
 
 
 ggplot(data.frame(gene_expression_tsne), aes(x=X1,y=X2))+
@@ -138,6 +135,8 @@ ggplot(df, aes(x=X1,y=X2,color=kmeans_cluster))+
 ggplot(df, aes(x=X1,y=X2,color=cluster))+
   geom_point()+
   labs(title = "UMAP")
+
+
 
 
 
