@@ -3,51 +3,12 @@
 
 
 
-
-
-pheno_data$sig_phenotype <- pheno_data$p_value < sig_level
-
-dat_long <- pheno_data[!is.na(pheno_data$sig_phenotype),] %>% 
-  group_by(gene_accession_id,parameter_stable_id) %>%
-  summarise(
-    most_freq_result = get_mode(sig_phenotype)  
-  )
-
-dat_long$most_freq_result <- as.numeric(as.logical(dat_long$most_freq_result))
-
-
-dat_wide <- pivot_wider(dat_long,
-                        id_cols = gene_accession_id,
-                        names_from = parameter_stable_id,
-                        values_from = most_freq_result
-)
-
-
-
-dat_wide <- dat_wide %>%
-  column_to_rownames("gene_accession_id")
-
-
-
-# Euclidean distance matrix
-dist_matrix <- dist(dat_wide)
-
-cl <- hclust(dist_matrix)
-
-class(dist_matrix)
-
-is.na(as.matrix(dist_matrix)[1:10,1:10]) 
-
-heatmap(as.matrix(dist_matrix),Rowv = NA, Colv = NA,scale="none")
-
 dim(dist_matrix)
 
+library(ggtree)
 
 
-
-
-
-
+den <- as.dendrogram(cl)
 
 
 dat_wide_t <- t(dat_wide)
@@ -57,9 +18,7 @@ dat_wide_t*1
 typeof(dat_wide_t)
 
 # Jaccard Distance
-dat_wide_t[is.na(dat_wide_t)] <- 0 
-
-
+dat_wide_t[is.na(dat_wide_t)] <- 0
 
 j_matrix <- jaccard(dat_wide_t)
 

@@ -8,20 +8,27 @@ library(shinyFiles)
 library(ggplot2)
 
 
-# ============================================================================ #
-# ============================== User interface ============================== #
-# ============================================================================ #
+
 addResourcePath("images", "Images")
 addResourcePath("db","../Database")
 
-
+# Give source scripts.
 source("Query.R")
 source("Eval_Grouping.R")
 source("../Scripts/Cluster/Distance.R")
+source("../Scripts/Cluster/ClusterHeatMap.R")
+source("../Scripts/Cluster/K_medoids.R")
+
 
 
 phenotype_data_queried = FALSE
+phenotye_dist_matrix_calculated   = FALSE
 
+
+
+# ============================================================================ #
+# ============================== User interface ============================== #
+# ============================================================================ #
 ui <-  dashboardPage(
   skin="green",
   # ==============================
@@ -30,7 +37,7 @@ ui <-  dashboardPage(
 dashboardHeader(
     title = tags$span(   # <- using a tag to design the interface.
       tags$img(src = "images/CurlyMouse_Big.png", height = "35px",
-               style = "margin-right: 8px;"),
+               style = "margin-right: 8px;"), 
       "CurlyDB",
     )
   ),
@@ -105,8 +112,7 @@ dashboardHeader(
           )
         ) 
         ),
-
-      # ==============================
+      # ==============================mv 
       # ==== Phenotype Analysis ======
       # ==============================
       tabItem(
@@ -142,10 +148,15 @@ dashboardHeader(
                         choices = list("Jaccard" = "jaccard", "Gower (Symetric Binary)"="gower","Euclidean"="euclidean"),
                         selected = "gower"),
             actionButton("Phenotype_distance", strong("Calculate Distances"), class="btn-warning"),
-            verbatimTextOutput("distance_status")
+            verbatimTextOutput("distance_status"),
+            
+            plotOutput("matrix_heatmap",height = 500, width = 500),
+            
+            actionButton("Visualise_pheno_heatmap", strong("Visualise Distance Matrix"), class="btn-info"),
+            
+            
             
             )
-          
             
           ),
 
@@ -154,36 +165,39 @@ dashboardHeader(
         fixedRow(
           height=5000,width=1500,
           box(
-            h2(strong("3.1 Dimension Reduction")),
-            plotOutput("plot1", height = 500, width = 150)
+            h2(strong("3. Clustering")),
+            plotOutput("phenoelbow_plot", height = 500, width = 500)
           ),
           box(
-            h2(strong("3.2 Hierarchical Clustering + Heatmap")),
+            h2(strong("4. Dimension Reduction Plot")),
             plotOutput("plot1", height = 500, width = 150)
           )
         ),
         
         
-        # Control Panel
         fixedRow(
+          # Control pannel for clustering
           box(
-            actionButton("GenPlot",strong("Generate Plot"),class="btn-danger"), 
+            actionButton("PhenoElbow",strong("Generate Elbow Plot"),class="btn-info"),
+            
+            actionButton("Cluster",strong("Run Clustering"),class="btn-danger"),
+            
+            selectInput("select", label = h3("Clustering"),
+                        choices = list("k-Medoids" = "kmedoid"),
+                        selected = 1),
+            
+            numericInput("k", label=h3("k"), value = 10)
+          ),
+          
+          box(
+            # Generate the dimension reduction plot.
+            actionButton("GenPlot",strong("Generate Plot"),class="btn-danger"),
+            
             
             selectInput("select", label = h3("Dimension Reduction"), 
                         choices = list("UMAP" = 1, "t-SNE" = 2), 
-                        selected = 1),  
-            
-            selectInput("select", label = h3("Clustering"),
-                        choices = list("k-means" = 1, "k-modes" = 2), 
                         selected = 1),
-            
-            numericInput("k", label=h3("k"), value = 5)
-            
           ),
-          box(
-            actionButton("GenPlot",strong("Generate Plot"),class="btn-danger"),
-            plotOutput("Grouping_Histogram", height = 500, width = 150)
-          )
         )
       ),
       
@@ -217,24 +231,28 @@ dashboardHeader(
             h2("Hierarchical Clustering + Heatmap"),
             plotOutput("plot1", height = 500, width = 150)
           )
-          
           ),
         
         # Control Pannel
         fixedRow(
           box(
-            actionButton("GenPlot",strong("Generate Plot"),class="btn-danger"),
+            # Control pannel for 
+            actionButton("Cluster",strong("Cluster"),class="btn-danger"),
  
-            selectInput("select", label = h3("Dimension Reduction"), 
-                        choices = list("UMAP" = 1, "t-SNE" = 2), 
-                        selected = 1),
             selectInput("select", label = h3("Clustering"),
                         choices = list("k-means" = 1, "k-modes" = 2), 
                         selected = 1),
             numericInput("k", label=h3("k"), value = 5)
               ),
+          
           box(
+            # Generate the dimension reduction plot.
             actionButton("GenPlot",strong("Generate Plot"),class="btn-danger"),
+            
+            
+            selectInput("select", label = h3("Dimension Reduction"), 
+                        choices = list("UMAP" = 1, "t-SNE" = 2), 
+                        selected = 1),
           )
         )
         )
@@ -277,7 +295,8 @@ server <- function(input, output, session){
       phenotype_data_queried <<- TRUE
     }
   )
-  
+
+
   # = Calculate a distance matrix for the phenotype data = #
   # ====================================================== #
   observeEvent(
@@ -291,35 +310,44 @@ server <- function(input, output, session){
         pheno_dist_matrix <<- pheno_distmatrix(
           in_pheno_data = pheno_data,
           distance = input$DistanceChoice,
-          in_sig_level = input$Signif_level
-          
-          )
+          in_sig_level = input$Signif_level)
+        
+        # outputs
         output$distance_status <- renderText({"Distance Matrix Complete!"})
+        phenotye_dist_matrix_calculated <<- TRUE
+        
+        
         
         
 
         }
       else{
         output$distance_status <- renderText({"Please Query the Database First!"})
-        
       }
-      
-
-      
-      
-      
     }
+  )
+  # ======== Visualise phenotypes distance matrix ======== #
+  # ====================================================== #
+  observeEvent(
+    input$Visualise_pheno_heatmap,
+    {
+      if (phenotye_dist_matrix_calculated){
+        output$matrix_heatmap <- renderPlot(cluster_heatmap(pheno_dist_matrix))
+        
+      }else{
+        print("Generate distance matrix first")
+      }})
+  
+  
+  # generate phenotype elbow plot.
+  
+  observeEvent(
+    input$PhenoElbow,
     
-    
+    output$phenoelbow_plot <- renderPlot(optimise_k(in_d_matrix=pheno_dist_matrix, randomseed=input$randomseed) )
     
   )
-  
-  
-}
-
-
-
-
+  }
 
 # ============================================================================ #
 # ======================== Construct Shiny Application ======================= #

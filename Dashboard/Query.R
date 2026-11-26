@@ -34,4 +34,3 @@ query_phenotype <- function(life_stages,param_grouping){
   
   return (phenotype_data)
   }
-

@@ -109,7 +109,7 @@ cl <- cluster_leiden(gow_graph,objective_function = "modularity")
 # k-means clustering
 kmeans <- kmeans(gow_matrix, centers = 4)
 
-
+ 
 
 
 df <- data.frame(gene_expression_umap$layout)
