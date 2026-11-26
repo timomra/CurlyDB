@@ -3,7 +3,7 @@
 The brief asks for groupings for: **weight, images and brain** **+ minimum 3 others**,
 based on test similarity and/or naming similarity, stored in the database.
 
-We use **20 groups**: the 3 required groups (by name) and 17 extra groups (by procedure).
+We use **19 groups**: the 3 required groups (by name) and 16 extra groups (by procedure).
 
 ## Groups
 | ID | Group | How parameters are chosen | Type |
@@ -26,15 +26,18 @@ We use **20 groups**: the 3 required groups (by name) and 17 extra groups (by pr
 | 16 | viability and fertility | Viability (VIA, EVL, EVM, EVO, EVP) and fertility (FER) | test similarity |
 | 17 | gene expression | Adult (ALZ) and embryo (ELZ) lacZ expression | test similarity |
 | 18 | respiratory | Whole body plethysmography (CHL) | test similarity |
-| 19 | pain | Formalin pain test (FOR) | test similarity |
-| 20 | general observation | SHIRPA and dysmorphology (CSD) and welfare observation (WEL) | test similarity |
+| 19 | general observation | SHIRPA and dysmorphology (CSD) and welfare observation (WEL) | test similarity |
 
 Test-similarity groups use the procedure code inside the parameter ID
-(e.g. IMPC_**ECG**_001_001). Every phenotyping procedure belongs to a group except LFO and OWT
-(see Known limitations). Only parameters with statistical results in the analysis data are grouped.
+(e.g. IMPC_**ECG**_001_001). Every phenotyping procedure in the analysis data belongs to a group
+except LFO and OWT (see Known limitations).
 
-The 20 groups cover **91.6% of analyses**. Procedure codes from other centres' pipelines
-(SLW, ROT, URI, PLC, MLN, PBI, BMI, EEI) were assigned to groups after checking their parameter names.
+Only parameters with statistical results in the analysis data are grouped. Image parameters are
+the exception: images are not statistically analysed but are a required group, so they are added
+from the parameter reference file (excluding image comments, pixel size and capture date).
+
+Procedure codes from other centres' pipelines (SLW, ROT, URI, PLC, MLN, PBI, BMI, EEI) were
+assigned to groups after checking their parameter names.
 
 ## Exclusion rules
 
@@ -43,6 +46,8 @@ The 20 groups cover **91.6% of analyses**. Procedure codes from other centres' p
   are never statistically analysed, so they are not in the analysis data and are not grouped
 - **Body weight is excluded from the procedure-based groups:** most procedures record
   body weight, but it belongs in the weight group
+- **No pain group:** the formalin pain test (FOR) has no statistical results in the analysis data,
+  so a pain group would be empty
 
 ## Database tables
 
@@ -63,5 +68,3 @@ The `group_id` column keeps the first group listed; `parameter_group_member` kee
 - Parameter IDs with more than one name in the analysis data use the first name listed
 - LFO parameters (e.g. "Hqp", "Esn") are left ungrouped because their names are uninformative
 - OWT organ weights named without "weight" (e.g. "Left kidney") are not matched by the weight group
-
-
