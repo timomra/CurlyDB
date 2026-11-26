@@ -1,7 +1,7 @@
 # Parameter groupings plan
 
 The brief asks for groupings for: **weight, images and brain** **+ minimum 3 others**,
-based on test similarity +/ naming similarity, stored in the database.
+based on test similarity and/or naming similarity, stored in the database.
 
 We use **20 groups**: the 3 required groups (by name) and 17 extra groups (by procedure).
 
@@ -29,22 +29,18 @@ We use **20 groups**: the 3 required groups (by name) and 17 extra groups (by pr
 | 19 | pain | Formalin pain test (FOR) | test similarity |
 | 20 | general observation | SHIRPA and dysmorphology (CSD) and welfare observation (WEL) | test similarity |
 
-
 Test-similarity groups use the procedure code inside the parameter ID
-(e.g. IMPC_**ECG**_001_001). Every phenotyping procedure belongs to a group;
-experimental design (EXD) and housing and husbandry (HOU) are left out because
-they are not phenotypes.
+(e.g. IMPC_**ECG**_001_001). Every phenotyping procedure belongs to a group except LFO and OWT
+(see Known limitations). Only parameters with statistical results in the analysis data are grouped.
 
 The 20 groups cover **91.6% of analyses**. Procedure codes from other centres' pipelines
 (SLW, ROT, URI, PLC, MLN, PBI, BMI, EEI) were assigned to groups after checking their parameter names.
 
-
 ## Exclusion rules
 
 - **Test-setup parameters are excluded from all groups:** parameters that record how a test
-  was run rather than a phenotype (e.g. equipment, experimenter, dates, anaesthetic, sample
-  handling, reagent catalogue numbers, antibody clones, arena settings, room temperature,
-  measurement timings), and all experimental design (EXD) parameters
+  was run rather than a phenotype (e.g. equipment, arena settings, reagents, sample handling)
+  are never statistically analysed, so they are not in the analysis data and are not grouped
 - **Body weight is excluded from the procedure-based groups:** most procedures record
   body weight, but it belongs in the weight group
 
@@ -53,6 +49,7 @@ The 20 groups cover **91.6% of analyses**. Procedure codes from other centres' p
 - `parameter_group`: group_id (PK), group_name, group_description
 - `parameter_group_member`: group_id (PK, FK), parameter_stable_id (PK, FK)
 - The parameters table also has a `group_id` column (FK), holding one group per parameter
+- Parameters with no statistical results have no group (`group_id` is NULL)
 
 A parameter can belong to more than one group
 (e.g. grip strength normalised against body weight is in weight and muscle).
@@ -63,7 +60,7 @@ The `group_id` column keeps the first group listed; `parameter_group_member` kee
 - Parameter IDs without a procedure code (e.g. ESLIM_005_001_701, M-G-P_004_001_001)
   can only be grouped by name
 - Name-based groups are broad (e.g. "weight" includes ratios normalised against body weight)
-- Parameter IDs with more than one name in the reference file use the first name listed
+- Parameter IDs with more than one name in the analysis data use the first name listed
 - LFO parameters (e.g. "Hqp", "Esn") are left ungrouped because their names are uninformative
 - OWT organ weights named without "weight" (e.g. "Left kidney") are not matched by the weight group
 
