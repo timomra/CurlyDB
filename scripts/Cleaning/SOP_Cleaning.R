@@ -534,6 +534,19 @@ pair_differences
 # Conflicting records require investigation before database insertion
 # No records or analysis identifiers have been modified
 
+# 18. Save structurally validated dataset
+
+# Create a folder for processed data if it does not already exist
+dir.create("Data/processed", recursive = TRUE, showWarnings = FALSE)
+
+# Save the combined data frame as an RDS file
+saveRDS(
+  data_all,
+  file = "Data/processed/group13_structurally_validated.rds"
+)
+
+# Confirm that the file was saved successfully
+file.exists("Data/processed/group13_structurally_validated.rds")
 
 
 
