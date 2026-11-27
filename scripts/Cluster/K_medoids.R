@@ -17,8 +17,11 @@ calc_mindist <- function(in_dist_matrix, km_clust,k){
 }
 
 
-optimise_k <- function(in_d_matrix,n=round(0.15*nrow(in_d_matrix)),randomseed){
+optimise_k <- function(in_d_matrix,n=40,randomseed){
+  # allows the user to optimise their clustering function (specifically for clustering methods that require a value for k)
   set.seed(randomseed)
+  
+  
   # k Medoids requires there not be missing values, therefore we impute our
   # missing distances with maximum distances of 1.
   in_d_matrix[is.na(in_d_matrix)] <- 1
@@ -50,7 +53,6 @@ optimise_k <- function(in_d_matrix,n=round(0.15*nrow(in_d_matrix)),randomseed){
 
 
 
-
 clustering <- function(randomseed,in_d_matrix,cluster_method,k){
   # Note: k is is taken as an argument even if it may not necessarily be used in 
   # some clustering algorithms.
@@ -64,17 +66,13 @@ clustering <- function(randomseed,in_d_matrix,cluster_method,k){
     
     in_d_matrix[is.na(in_d_matrix)] <- 1
     kmed_clusters <- fastkmed(as.dist(in_d_matrix),ncluster = k, iterate = 100,init=kminit)
+    
+    # Ensure that the cluster is treated as a catagorical variable not as a numerical one 
+    cluster_df <- as.data.frame(as.factor(kmed_clusters$cluster))
+    names(cluster_df) <- c("k-medoid cluster")
   }
   return(cluster_df)
 }
-
-
-
-
-
-
-
-
 
 
 

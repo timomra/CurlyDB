@@ -46,28 +46,16 @@ pheno_distmatrix <- function(in_pheno_data,in_sig_level,distance){
     column_to_rownames("gene_accession_id")
   
   
-  if (distance=="gower"){
+  if (distance=="gower_Sym"){
     out_dist_matrix <- gowdis(in_pheno_data_wide)
   }
-  else if (distance=="jaccard"){
-    # The function for jaccard distance expects samples to be columns, so we feed in a transposed matrix.
-    transposed_in_pheno_data_wide <- t(in_pheno_data_wide)
-    
-    # Additionally, as Jaccard only considers elements that are present in both sets (1s not 0s), and since this function 
-    # does not allow NA values, we replace all missing values with 0 - hence implicitly assuming that traits which
-    # were not measured for these genotypes were not present, which is a flaw, and why we do not recomend using jaccard distance.
-    transposed_in_pheno_data_wide[is.na(transposed_in_pheno_data_wide)] <- 0
-    
-    out_dist_matrix <- jaccard(transposed_in_pheno_data_wide)
-    # the output of this is already a matrix type, so no need to convert
+  
+  if (distance=="gower_Asym"){
+    out_dist_matrix <- gowdis(in_pheno_data_wide,
+                              asym.bin = 1:ncol(in_pheno_data_wide)
+                              )
   }
-  else if (distance=="euclidean"){
-    # Uses R's built-in distance function to calculate euclidean distance.
-    out_dist_matrix <- dist(in_pheno_data_wide,method = "euclidean")
-    
-    # Scale the matrix to a 1-0 scale so that it is compatible with my other functions
-    out_dist_matrix <- out_dist_matrix/max(out_dist_matrix,na.rm = TRUE) 
-  }
+  
   
   # some of the functions outpt a dist object instead of a matrix, so we 
   # standardise this by converting them all into matrices

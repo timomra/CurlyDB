@@ -18,13 +18,10 @@ source("Eval_Grouping.R")
 source("../Scripts/Cluster/Distance.R")
 source("../Scripts/Cluster/ClusterHeatMap.R")
 source("../Scripts/Cluster/K_medoids.R")
-
-
+source("../Scripts/Cluster/DimRed.R")
 
 phenotype_data_queried = FALSE
 phenotye_dist_matrix_calculated   = FALSE
-
-
 
 # ============================================================================ #
 # ============================== User interface ============================== #
@@ -42,20 +39,16 @@ dashboardHeader(
     )
   ),
 
-  
-  
   # ==============================
   # =========== Sidebar ==========
   # ==============================  
   dashboardSidebar(
     sidebarMenu(
       menuItem("Home", tabName="Home", icon=icon("book", lib = "glyphicon")),
-      menuItem("Phenotype_Analysis", tabName="Phenotype_Analysis", icon=icon("grain",lib = "glyphicon")),
-      menuItem("Tissue_Analysis", tabName="Tissue_Analysis", icon=icon("eye-open",lib = "glyphicon"))
-      
+      menuItem("Phenotype Analysis", tabName="Phenotype_Analysis", icon=icon("grain",lib = "glyphicon")),
+      menuItem("Tissue Analysis", tabName="Tissue_Analysis", icon=icon("eye-open",lib = "glyphicon")),
+      menuItem("Manhattan Plot", tabName="Manhattan_Plot", icon=icon("equalizer",lib = "glyphicon"))
     )),
-  
-  
   
   # ==============================
   # =========== Body =============
@@ -112,7 +105,7 @@ dashboardHeader(
           )
         ) 
         ),
-      # ==============================mv 
+
       # ==== Phenotype Analysis ======
       # ==============================
       tabItem(
@@ -144,9 +137,9 @@ dashboardHeader(
             h3(strong("2. Distance Calculation")),
             width = 6,
             
-            selectInput("DistanceChoice", label = ("Select Distance Metric:"), 
-                        choices = list("Jaccard" = "jaccard", "Gower (Symetric Binary)"="gower","Euclidean"="euclidean"),
-                        selected = "gower"),
+            selectInput("DistanceChoice", label = ("Select Distance Metric:"),
+                        choices = list("Gower (Asymmetric Binary)" = "gower_Asym", "Gower (Symmetric Binary)"="gower_Sym"),
+                        selected = "Gower (Symmetric Binary)"),
             actionButton("Phenotype_distance", strong("Calculate Distances"), class="btn-warning"),
             verbatimTextOutput("distance_status"),
             
@@ -154,12 +147,8 @@ dashboardHeader(
             
             actionButton("Visualise_pheno_heatmap", strong("Visualise Distance Matrix"), class="btn-info"),
             
-            
-            
             )
-            
           ),
-
         
         # Results Display
         fixedRow(
@@ -170,36 +159,78 @@ dashboardHeader(
           ),
           box(
             h2(strong("4. Dimension Reduction Plot")),
-            plotOutput("plot1", height = 500, width = 150)
+            plotOutput("pheno_dimred_plot", height = 500, width = 600)
           )
         ),
-        
         
         fixedRow(
           # Control pannel for clustering
           box(
-            actionButton("PhenoElbow",strong("Generate Elbow Plot"),class="btn-info"),
+            actionButton("run_pheno_clustering",strong("Run Clustering"),class="btn-danger"),
+            conditionalPanel(
+                  condition = "input.select_pheno_clustering == 'kmedoid'", 
+                  actionButton("PhenoElbow",strong("Generate Elbow Plot"),class="btn-info"),
             
-            actionButton("Cluster",strong("Run Clustering"),class="btn-danger"),
-            
-            selectInput("select", label = h3("Clustering"),
+            # Run the clustering
+            selectInput("select_pheno_clustering", label = h3("Clustering"),
                         choices = list("k-Medoids" = "kmedoid"),
                         selected = 1),
             
-            numericInput("k", label=h3("k"), value = 10)
-          ),
+            numericInput("k_pheno", label=h3("k"), value = 10)
+          )),
           
           box(
             # Generate the dimension reduction plot.
-            actionButton("GenPlot",strong("Generate Plot"),class="btn-danger"),
+            actionButton("Generate_pheno_dimred_plot",strong("Generate Plot"),class="btn-danger"),
+            checkboxInput("pheno_include_clustering", "Include clustering labels?",TRUE),
             
+            selectInput("pheno_dimred", label = h3("Dimension Reduction"), 
+                        choices = list("UMAP" = "umap", "t-SNE" = "tsne"), 
+                        selected = "UMAP"),
             
-            selectInput("select", label = h3("Dimension Reduction"), 
-                        choices = list("UMAP" = 1, "t-SNE" = 2), 
-                        selected = 1),
+            # Allow users to select the hyperparameters perplexity OR n neighbours 
+            # depending on whether t-SNE or UMAP were selected. 
+            # While other hyperparameters exist for these algorithms, these were 
+            # included as they can allow the user to select whether they are more 
+            # interested in local or global structure depending on the value 
+            # for k they picked.
+            conditionalPanel(
+              condition = "input.pheno_dimred == 'tsne'",
+              numericInput("hyper_param", label=h3("t-SNE perplexity"), value = 30)
+            ),
+            conditionalPanel(
+              condition = "input.pheno_dimred == 'umap'",
+              numericInput("hyper_param", label=h3("UMAP n neighbours"), value = 30)
+            )
           ),
+        ),
+        fixedRow(
+          height=5000,width=1500,
+          
+          box(
+            
+            selectInput("select_cluster", label = "Select cluster:", choices = NULL)
+            
+          ),
+          
+          box(
+
+            
+          )
+          
+          
+          
+          
+          
+          
         )
+        
+        
       ),
+      
+      
+      
+      
       
       # ==============================
       # ====== Tissue Analysis =======
@@ -207,70 +238,17 @@ dashboardHeader(
       tabItem(
         tabName = "Tissue_Analysis",
         
-        # Data Selection
-        fluidPage(
-          box(
-            width = 14,
-            selectInput("select", label = h4("Mouse Life Stage"), 
-                        choices = list("E9.5"=1,"E12.5" = 2,"E15.5" = 3,"E18.5" = 4,"Early adult"=5,"Middle aged adult"=6,"Late adult"=7), 
-                        selected = 5),
-            selectInput("select", label = h3("Distance Calculation"), 
-                        choices = list("Jaccard" = 1, "Gower (Podani, 1999)"=2 ,"Bray–Curtis" = 3),
-                        selected = 1),
-          ),
-        ),
-        
-        # Results Display
-        fixedRow(
-          height=5000,width=1500,
-          box(
-            h2("Dimension Reduction"),
-            plotOutput("plot1", height = 500, width = 150)
-          ),
-          box(
-            h2("Hierarchical Clustering + Heatmap"),
-            plotOutput("plot1", height = 500, width = 150)
+
+
+
           )
-          ),
-        
-        # Control Pannel
-        fixedRow(
-          box(
-            # Control pannel for 
-            actionButton("Cluster",strong("Cluster"),class="btn-danger"),
- 
-            selectInput("select", label = h3("Clustering"),
-                        choices = list("k-means" = 1, "k-modes" = 2), 
-                        selected = 1),
-            numericInput("k", label=h3("k"), value = 5)
-              ),
-          
-          box(
-            # Generate the dimension reduction plot.
-            actionButton("GenPlot",strong("Generate Plot"),class="btn-danger"),
-            
-            
-            selectInput("select", label = h3("Dimension Reduction"), 
-                        choices = list("UMAP" = 1, "t-SNE" = 2), 
-                        selected = 1),
-          )
-        )
-        )
-      )
-      )
-)
+)))
 
 
 # ============================================================================ #
 # ================================== Server ================================== #
 # ============================================================================ #
 server <- function(input, output, session){
-  # ======= Check and Change the level of Significance === #
-  # ====================================================== #
-  
-  
-  
-  
   # ======= Query and evaluate Phenotype Data ============ #
   # ====================================================== #  
   observeEvent(
@@ -296,7 +274,7 @@ server <- function(input, output, session){
     }
   )
 
-
+    
   # = Calculate a distance matrix for the phenotype data = #
   # ====================================================== #
   observeEvent(
@@ -314,11 +292,7 @@ server <- function(input, output, session){
         
         # outputs
         output$distance_status <- renderText({"Distance Matrix Complete!"})
-        phenotye_dist_matrix_calculated <<- TRUE
-        
-        
-        
-        
+        phenotye_dist_matrix_calculated <<- TRUE        
 
         }
       else{
@@ -338,16 +312,73 @@ server <- function(input, output, session){
         print("Generate distance matrix first")
       }})
   
-  
   # generate phenotype elbow plot.
-  
   observeEvent(
     input$PhenoElbow,
+    output$phenoelbow_plot <- renderPlot(optimise_k(in_d_matrix=pheno_dist_matrix, randomseed=input$randomseed))
+  )
+  
+  # ============== Run phenotype clustering ============== #
+  # ====================================================== #
+  observeEvent(
+    input$run_pheno_clustering,
+    {
+      clusters <<- clustering(
+        in_d_matrix = pheno_dist_matrix,
+        randomseed=input$randomseed,
+        cluster_method = input$select_pheno_clustering,
+        k= input$k_pheno
+        
+        
+      )
+      
+      
+      updateSelectInput(session, "select_cluster",
+                        choices = seq_len(input$k_pheno),
+                        selected = 1)
+      
+      
+    }
     
-    output$phenoelbow_plot <- renderPlot(optimise_k(in_d_matrix=pheno_dist_matrix, randomseed=input$randomseed) )
     
   )
+  
+  
+  
+  # ==== Visualise phenotypes dimension reduction plot === #
+  # ====================================================== #
+  observeEvent(
+    input$Visualise_pheno_heatmap,
+    {
+      if (phenotye_dist_matrix_calculated){
+        output$matrix_heatmap <- renderPlot(cluster_heatmap(pheno_dist_matrix))
+        
+      }else{
+        print("Generate distance matrix first")
+      }})
+  
+  # generate phenotype elbow plot.
+  observeEvent(
+    input$Generate_pheno_dimred_plot,
+    {
+    output$pheno_dimred_plot <- renderPlot(
+      
+      plot_dimred(embeddings_df = get_embeddings(
+        
+        in_dist_matrix = pheno_dist_matrix,
+        random_seed=input$randomseed,
+        dimred_method = input$pheno_dimred,
+        hyper_param = input$hyper_param),
+        
+        include_clusters=input$pheno_include_clustering,
+        cluster_df = clusters
+      )
+      )})
+  
   }
+
+  
+
 
 # ============================================================================ #
 # ======================== Construct Shiny Application ======================= #
