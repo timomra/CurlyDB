@@ -1,11 +1,12 @@
 # Call the previous scripts
-source("Scripts/Cleaning/SpellCheck_Cleaning.R")
 library(ggplot2)
 
 
 
-cleaned_analysis_data <- cleaned_spellings
-
+cleaned_analysis_data <- readRDS("Results/Cleaning_intermediates/3-1_Spellcheck_Cleaning.rds")
+parameters <- read.csv("Data/IMPC_parameter_description.txt", strip.white = TRUE)
+procedures <- read.csv("Data/IMPC_procedure.txt", strip.white = TRUE)
+stat_resuls <- read.csv("Data/External_Data/statistical-results-brief.csv")
 
 
 # ================= # 
@@ -15,77 +16,15 @@ cleaned_analysis_data <- cleaned_spellings
 # if not, drop both as we cant know which is the correct one.
 
 
+# TO be completed...
 
 
-# ================= # 
-# Create a dataset of flagged records.
-# ================= #
-# Now after the spell check cleaning, we locate those files which had the same name to see if they still do.
-
-suffix_indices <- match(suffix_files, cleaned_analysis_data$file)
-original_indices <- match(original_filenames, cleaned_analysis_data$file)
-
-identical_pairs <- vapply(seq_along(suffix_indices), function(i) {
-  identical(
-    unname(as.character(cleaned_analysis_data[suffix_indices[i], analysis_fields])),
-    unname(as.character(cleaned_analysis_data[original_indices[i], analysis_fields]))
-  )
-}, logical(1))
-
-
-# After spell-corrections, only 9 of the records are non-matching duplicates which mostly differ by one field.
-table(identical_pairs)
-
-suffix_files[!identical_pairs]
-
-pair_differences <- lapply(which(!identical_pairs), function(i) {
-  
-  original <- unlist(cleaned_analysis_data[original_indices[i], analysis_fields],
-                     use.names = FALSE)
-  
-  duplicate <- unlist(cleaned_analysis_data[suffix_indices[i], analysis_fields],
-                      use.names = FALSE)
-  
-  # Compare values, treating two missing values as equivalent
-  different <- !(original == duplicate |
-                   (is.na(original) & is.na(duplicate)))
-  
-  different[is.na(different)] <- TRUE
-  
-  # Return the filenames and names of differing fields
-  data.frame(
-    original_file = original_filenames[i],
-    suffix_file = suffix_files[i],
-    differing_fields = paste(analysis_fields[different],
-                             collapse = ", ")
-  )
-})
-
-pair_differences <- do.call(rbind, pair_differences)
-
-
-# Proposed solution (Tim)
-# Drop the 27 duplicates with the same analysis ID and same fields.
-# data_clean <- data_clean[-suffix_indices[identical_pairs],]
-
-pair_differences
-data.frame(pair_differences[1])[,]
-
-c(data.frame(pair_differences[1])[,3])
-
-for (i in 1:length(pair_differences)){
-  print(cleaned_analysis_data[cleaned_analysis_data$file %in% data.frame(pair_differences[i])[,1:2], c(data.frame(pair_differences[i])[,3])])
-}
 
 
 
 # For the remainder, I will re-evaluate them after running through my 
 # spell-correcting script.
 
-
-# ================= # 
-# Flag Significant results 
-# ================= #
 
 # As there are many statistical tests being performed, we need to correct for multiple testing.
 # From the IMPC website; Generally, the IMPC has adopted a significance level of 10-4 (P < 0.0001), which is the one displayed on the website, unless otherwise indicated. This is the choice made when screens of thousands of genes are conducted, to maintain a false discovery rate (FDR) below 5%. Please note that the significance level for pain sensitivity data, based on 110 genes, is 10-3 (P < 0.001).
@@ -109,6 +48,7 @@ table(cleaned_analysis_data$p_value < 0.0001)
 
 # At the normal 5% level, there are around 3590 significant hits
 table(cleaned_analysis_data$p_value < 0.05) 
+
 
 
 
@@ -283,6 +223,7 @@ procedures_extrainfo <- procedures_extrainfo %>%
   group_by(procedure_stable_id) %>%
   mutate(procedure_key = cur_group_id()) %>%    # <- assign a unique numeric identifier to our unique groups
   ungroup()
+
 
 
 write.csv(procedures_extrainfo,"Results/Cleaned_Data/Procedures_extra_info.csv")

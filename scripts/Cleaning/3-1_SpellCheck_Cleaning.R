@@ -1,25 +1,19 @@
-# Set working dir for HPC.
-# setwd("/users/k26067916/DCDM_project/")
-
-# First we call the QC script to re-use some of their useful variables and avoid duplicating code
-source("Scripts/Cleaning/Initial_SOP_QualityChecks.R")
-# Then I call the SOP cleaning script, primarily to get it's data_clean variable
-source("Scripts/Cleaning/SOP_Cleaning.R")
-
 source("Scripts/Cleaning/SpellCheck_Function.R") # <- sourcing a spell check function from another script. 
-
-# Save memory by removing some of the un-needed variables
-remove(data_all)
-remove(raw_list)
-remove(diseases)
 
 # Library imports
 library(dplyr)
 
 
-# I first made a copy of the SOP_cleaning dataframe
-cleaned_spellings <- data_clean
+data_clean <- readRDS("Results/Cleaning_intermediates/2-2_Cleaning.rds")
 
+cleaned_spellings <- data_clean
+sop <- read.csv("Data/IMPC_SOP_2026.csv")
+allowed_values <- function(field) {
+  remark <- sop$remarks[sop$dataField == field]
+  values <- sub("\\.$", "", trimws(sub(".*Values are:? ", "", remark)))
+  sep    <- if (grepl(",", values)) "," else ";"
+  trimws(strsplit(values, sep)[[1]])
+}
 
 # ================= # 
 #   Clean Tissues
@@ -33,6 +27,10 @@ cleaned_spellings <- data_clean
 # 3. Remove all of the special characters, since none of the allowed names 
 # contain any numbers or special characters. 
 
+# extract names of the lacz tissues 
+lacz_fields     <-  colnames(cleaned_spellings)[grep("^lacz_",colnames(cleaned_spellings))]
+
+
 # A regular expression containing all the special characters I could think of and numbers 
 special_pat <- "[\\!@#$%^&*()_|\\-|\\+=|\\[|\\]|\\{|\\}|;:'|\"|,.<>/?~0-9]"
 
@@ -44,7 +42,8 @@ cleaned_spellings <- cleaned_spellings %>%
   mutate(across(all_of(lacz_fields),function(x){str_replace_all(x,special_pat,"")}),)%>%   # <- Remove all special characters
   mutate(across(all_of(lacz_fields),function(x){str_replace_all(x,"no data","No data")}),)%>%# <- change the "no data" back into "No data"
   mutate(across(all_of(lacz_fields),function(x){str_replace_all(x,"imageonly","imageOnly")}),) # <- change the "no data" back into "No data"
-  
+
+
 # Evaluate cleaning
 # The QC script defines a function which gives us the defined "allowed values"
 allowed_lacz <- allowed_values("lacz_*")
@@ -115,7 +114,7 @@ cleaned_spellings$mouse_life_stage[!(cleaned_spellings$mouse_life_stage %in% all
 # dataset to sub-in the correct gene names.
 
 # To save memory I only kept the marker symbols
-mgi_genes <- read.delim("Data/MRK_List2.rpt")
+mgi_genes <- read.delim("Data/External_Data/MRK_List2.rpt")
 
 
 # There are only two genes in our dataset which do not appear in the official dataset, 
@@ -154,7 +153,7 @@ remove(mgi_genes)
 # (the dataset: https://www.informatics.jax.org/downloads/reports/MGI_PhenotypicAllele.rpt)
 # however this time since genes can have many alleles it wasnt as simple.
 
-allele_data <- read.delim("Data/MGI_PhenotypicAllele.tsv",sep = "\t", header = FALSE)
+allele_data <- read.delim("Data/External_Data/MGI_PhenotypicAllele.tsv",sep = "\t", header = FALSE)
 colnames(allele_data) <- c("MGI Allele Accession ID", "Allele Symbol","Allele Name","Allele Type","Allele Attribute","PubMed ID for original reference","MGI Marker Accession ID","Marker Symbol","Marker RefSeq ID","Marker Ensembl ID","High-level Mammalian Phenotype ID (comma-delimited)","Synonyms (|-delimited)","Marker Name")
 
 # This time only 77% of the alleles in my data were present in the dataset. 
@@ -222,10 +221,12 @@ remove(missing_alleles)
 # ================= #
 # Like before, we have a dataset of correct parameter IDs that we will try
 # to match to our dataset.
+parameters <- read.csv("Data/IMPC_parameter_description.txt", strip.white = TRUE)
+procedures <- read.csv("Data/IMPC_procedure.txt", strip.white = TRUE)
 
 # The complete list of parameter stable IDs used by the IMPC
 # Source: https://ftp.ebi.ac.uk/pub/databases/impc/all-data-releases/release-25.0/results/ 
-stat_resuls <- read.csv("Data/statistical-results-brief.csv")
+stat_resuls <- read.csv("Data/External_Data/statistical-results-brief.csv")
 
 
 # View a table of characters that are used in the IMPC parameter IDs 
@@ -264,6 +265,7 @@ sum(!(cleaned_spellings$parameter_stable_id %in% parameters$parameterId))/nrow(c
 # Spell_Checks_Complete!
 # ================= #
 
+saveRDS(cleaned_spellings, "Results/Cleaning_intermediates/3-1_Spellcheck_Cleaning.rds")
 
 
 

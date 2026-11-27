@@ -22,6 +22,10 @@
 # records, 20 original fields and one source filename column
 
 
+# Source the SOP quality checks script to avoid repeating the slow process of
+# reading all the files into memory
+source("Scripts/Cleaning/1-1_Initial_SOP_QualityChecks.R")
+
 # 1. Data import and structural validation
 # Import the SOP containing the data validation rules
 
@@ -536,17 +540,20 @@ pair_differences
 
 # 18. Save structurally validated dataset
 
+
 # Create a folder for processed data if it does not already exist
-dir.create("Data/processed", recursive = TRUE, showWarnings = FALSE)
+dir.create("Results/Cleaning_intermediates", recursive = TRUE, showWarnings = FALSE)
+
 
 # Save the combined data frame as an RDS file
 saveRDS(
   data_all,
-  file = "Data/processed/group13_structurally_validated.rds"
+  file = "Results/Cleaning_intermediates/2-1_structurally_validated.rds"
 )
 
+
 # Confirm that the file was saved successfully
-file.exists("Data/processed/group13_structurally_validated.rds")
+file.exists("Results/Cleaning_intermediates/2-1_structurally_validated.rds")
 
 
 

@@ -8,7 +8,6 @@ library(shinyFiles)
 library(ggplot2)
 
 
-
 addResourcePath("images", "Images")
 addResourcePath("db","../Database")
 
