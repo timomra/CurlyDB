@@ -1,4 +1,4 @@
-# Database Schema Design
+# Database Schema Design Initial Plan --> utilised during our meeting 
 
 ## 1. Proposed database tables
 
