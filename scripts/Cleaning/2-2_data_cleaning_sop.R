@@ -1285,16 +1285,62 @@ data_clean$parameter_stable_id[remaining_invalid] <- corrected_remaining
 # Count corrections
 nrow(final_parameter_changes)
 
+#=============================================================
+# 24.3 REBUILD PARAMETER IDS FROM THEIR FOUR PARTS
+#=============================================================
+
+# Every parameter ID has four parts: pipeline_procedure_number_version
+# (e.g. IMPC_EYE_012_001). The last nine characters are always a
+# 3-character procedure code and two 3-digit numbers, so the underscores
+# can be removes and put back at fixed positions.
+
+# Preserve parameter IDs before rebuilding
+original_ids_rebuild <- data_clean$parameter_stable_id
+
+#Remove all underscores, then cut into the four parts
+joined <- gsub("_", "", original_ids_rebuild)
+n <- nchar(joined)
+
+rebuilt_ids <- paste(substr(joined, 1, n - 9),     # pipeline e.g.IMPC
+                     substr(joined, n - 8, n - 6), # procedure e.g. EYE
+                     substr(joined, n - 5, n -3),  # parameter e.g. 012
+                     substr(joined, n - 2, n),     # version e.g. 001
+                     sep = "_")
+rebuilt_ids[is.na(original_ids_rebuild)] <- NA
+
+# Record original and corrected values
+rebuild_rows <- which(!is.na(original_ids_rebuild)& original_ids_rebuild != rebuilt_ids)
+
+parameter_rebuild_changes <- data.frame(
+  file = data_clean$file[rebuild_rows],
+  original_value = original_ids_rebuild[rebuild_rows],
+  corrected_value = rebuilt_ids[rebuild_rows]
+)
+
+# Apply corrections
+data_clean$parameter_stable_id <-  rebuilt_ids
+
+# Count corrections
+nrow(parameter_rebuild_changes)
+
+##QC Results:
+# Underscores inserted inside ID components were not removed by earlier steps
+# (e.g. IMPC_E_YE_012_001, IMP_C_DXA_004_001)
+# All underscores were removed and re-inserted at fixed positions
+# 175 paramter IDs were corrected
+# Original values were preserved in data_all and parameter_rebuild_changes
+# No analysis records were removed
 # ============================================================
-# 24.3 FINAL VALIDATION
+# 24.4 FINAL VALIDATION
 # ============================================================
 
 # Count remaining formatting errors
 remaining_format_errors <- sum(
   !is.na(data_clean$parameter_stable_id) &
-    !grepl("^[A-Z0-9]+(_[A-Z0-9]+)+$",
+    !grepl("^[A-Z0-9]+_[A-Z0-9]{3}_[0-9]{3}_[0-9]{3}$",
            data_clean$parameter_stable_id)
 )
+
 
 print(remaining_format_errors)
 
