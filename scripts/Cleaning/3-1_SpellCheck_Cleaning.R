@@ -74,22 +74,26 @@ allowed_lifestage
 # used in some of the allowed names
 special_pat_lifestage <- "[\\!@#$%^&*()_|\\-|\\+=|\\[|\\]|\\{|\\}|;:'|\"|,<>/?~]"
 
+cap_first <- function(x) ifelse(is.na(x), NA, paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x))))
+
 cleaned_spellings <- cleaned_spellings %>%
   mutate(across(mouse_life_stage,tolower)) %>%
   mutate(across(mouse_life_stage,trimws))  %>%
   mutate(across(mouse_life_stage,function(x){str_replace_all(x,special_pat_lifestage,"")}),) %>%
-  mutate(across(mouse_life_stage,function(x){paste0(toupper(substr(x,1,1)), substr(x,2,nchar(x)))})) # <- This time all of them need to start with a capital letter so we do this instead
+  mutate(across(mouse_life_stage, cap_first)) # <- This time all of them need to start with a capital letter so we do this instead
 
 # We cant blanket remove characters like . or numerics this time, so I used my custom 
 # spell correct function to fix this.
 
 uni <- unique(cleaned_spellings$mouse_life_stage)
-fixes <-   lapply(uni, fix_insertions,allowed_strings=allowed_lifestage)
-cleaned_spellings$mouse_life_stage <- fixes[match(cleaned_spellings$mouse_life_stage,uni)]
+uni <- uni[!is.na(uni)]
+fixes <- vapply(uni, fix_insertions, character(1), allowed_strings = allowed_lifestage)
+cleaned_spellings$mouse_life_stage <- unname(fixes[match(cleaned_spellings$mouse_life_stage, uni)])
 
 # Fix the capitalisation at start of first letter again.
-cleaned_spellings<-cleaned_spellings %>%
-  mutate(across(mouse_life_stage,function(x){paste0(toupper(substr(x,1,1)), substr(x,2,nchar(x)))}))
+# Fix the capitalisation at start of first letter again.
+cleaned_spellings <- cleaned_spellings %>%
+  mutate(across(mouse_life_stage, cap_first))
 
 table(cleaned_spellings$mouse_life_stage[!(cleaned_spellings$mouse_life_stage%in% allowed_lifestage)])
 
@@ -122,10 +126,11 @@ mgi_genes <- read.delim("Data/External_Data/MRK_List2.rpt")
 #View(cleaned_spellings[!(cleaned_spellings$gene_accession_id %in% mgi_genes$MGI.Accession.ID),])
 
 # Additionally, when I merged the Marker.Symbol column onto my main dataframe, 96% of the symbols matched perfectly. 
-cleaned_spellings <- merge(x=cleaned_spellings, y=mgi_genes[,c("MGI.Accession.ID","Marker.Symbol")], 
-                           by.x = "gene_accession_id", by.y = "MGI.Accession.ID",
-                           all.x =TRUE # <= specifying left merge
-)
+n_before <- nrow(cleaned_spellings)
+cleaned_spellings <- left_join(cleaned_spellings,
+                               distinct(mgi_genes[, c("MGI.Accession.ID", "Marker.Symbol")]),
+                               by = c("gene_accession_id" = "MGI.Accession.ID"))
+
 sum(cleaned_spellings$Marker.Symbol == cleaned_spellings$gene_symbol,na.rm = TRUE) / nrow(cleaned_spellings) *100
 
 # Most of the small differences come from minor injections of characters and symbols.
@@ -210,10 +215,6 @@ cleaned_spellings$allele_symbol[!is.na(correction_rows)] <- corrections$correcte
 # Now around 96% match to my dataset.
 sum(cleaned_spellings$allele_symbol %in% allele_data$`Allele Symbol`)/nrow(cleaned_spellings)*100
 
-# save memory
-remove(allele_data)
-remove(allele_to_genes)
-remove(missing_alleles)
 
 
 # ================= # 
@@ -257,15 +258,13 @@ sum(!(cleaned_spellings$parameter_stable_id %in% stat_resuls$parameter_stable_id
 parameters <- parameters %>%  # cleaned whitespace out of parameters 
   mutate(across(parameterId,trimws))
 
+
 sum(!(cleaned_spellings$parameter_stable_id %in% parameters$parameterId))/nrow(cleaned_spellings)*100
 
 
-# This will be addressed in the subsequent script.
 # ================= # 
 # Spell_Checks_Complete!
 # ================= #
 
 saveRDS(cleaned_spellings, "Results/Cleaning_intermediates/3-1_Spellcheck_Cleaning.rds")
-
-
 

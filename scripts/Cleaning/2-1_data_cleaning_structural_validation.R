@@ -24,7 +24,7 @@
 
 # Source the SOP quality checks script to avoid repeating the slow process of
 # reading all the files into memory
-source("Scripts/Cleaning/1-1_Initial_SOP_QualityChecks.R")
+source("scripts/Cleaning/1-1_Initial_SOP_QualityChecks.R")
 
 # 1. Data import and structural validation
 # Import the SOP containing the data validation rules

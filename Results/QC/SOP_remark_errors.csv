@@ -1,11 +1,11 @@
 "","field","check","errors"
 "1","strain_name","Allowed values",0
-"2","mouse_life_stage","Allowed values",3175
-"3","lacz_* (all tissues)","Allowed values",36611
+"2","mouse_life_stage","Allowed values",3163
+"3","lacz_* (all tissues)","Allowed values",36535
 "4","analysis_id","Alphanumeric",0
-"5","analysis_id","Unique",131
+"5","analysis_id","Unique",60
 "6","gene_accession_id","MGI format",0
-"7","gene_symbol","Title format, alphanumeric",1831
-"8","parameter_stable_id","Alphanumeric (with underscores)",5253
-"9","allele_symbol","Starts with gene_symbol",3177
-"10","allele_symbol","Brackets properly closed",834
+"7","gene_symbol","Title format, alphanumeric",1826
+"8","parameter_stable_id","Alphanumeric (with underscores)",5242
+"9","allele_symbol","Starts with gene_symbol",3168
+"10","allele_symbol","Brackets properly closed",832

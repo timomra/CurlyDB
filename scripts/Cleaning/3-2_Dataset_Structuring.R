@@ -10,35 +10,18 @@ procedures <- read.csv("Data/IMPC_procedure.txt", strip.white = TRUE)
 stat_resuls <- read.csv("Data/External_Data/statistical-results-brief.csv")
 
 
-# ================= # 
-# Clean Row duplicates
-# ================= #
-# Do a quick check to make sure the rows are identical and then just drop them.
-# if not, drop both as we cant know which is the correct one.
-
-
-# TO be completed...
-
-
-
-
-
-# For the remainder, I will re-evaluate them after running through my 
-# spell-correcting script.
-
-
 # As there are many statistical tests being performed, we need to correct for multiple testing.
 # From the IMPC website; Generally, the IMPC has adopted a significance level of 10-4 (P < 0.0001), which is the one displayed on the website, unless otherwise indicated. This is the choice made when screens of thousands of genes are conducted, to maintain a false discovery rate (FDR) below 5%. Please note that the significance level for pain sensitivity data, based on 110 genes, is 10-3 (P < 0.001).
 # For our analyses, we will consider a gene-knockout to cause the phenotype if it has this significance level too.
-cleaned_analysis_data$p_value <- as.numeric(cleaned_analysis_data$p_value)
+# cleaned_analysis_data$p_value <- as.numeric(cleaned_analysis_data$p_value)
 
 # We can see that there are quite a lot of non-significant values, but also some
 # significant ones
-ggplot(cleaned_analysis_data, aes(x=p_value)) +
-  geom_density(stat = "count",fill="black") +
-  scale_x_log10()+ 
-  scale_y_log10()+
-  geom_vline(xintercept =  0.0001, color="red",)
+#ggplot(cleaned_analysis_data, aes(x=p_value)) +
+#  geom_density(stat = "count",fill="black") +
+#  scale_x_log10()+ 
+#  scale_y_log10()+
+#  geom_vline(xintercept =  0.0001, color="red",)
 
 
 # At this level, there are only around 814 significant hits
@@ -58,7 +41,6 @@ table(cleaned_analysis_data$p_value < 0.05)
 # ================= #
 # Finally, save the cleaned dataframe
 write.csv(cleaned_analysis_data, file="Results/Cleaned_Data/Cleaned_Data.csv")
-
 
 
 
@@ -225,9 +207,13 @@ procedures_extrainfo <- procedures_extrainfo %>%
   mutate(procedure_key = cur_group_id()) %>%    # <- assign a unique numeric identifier to our unique groups
   ungroup()
 
-
-
 write.csv(procedures_extrainfo,"Results/Cleaned_Data/Procedures_extra_info.csv")
+
+
+
+
+
+
 
 
 
