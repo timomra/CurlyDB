@@ -18,4 +18,4 @@ The scripts should be run in the following order:
 `SpellCheck_Function.R` defines a function which is uses Levenshtein distance for spell checks. (see ``SpellCheck_cleaning_function.svg`` for a visualisation of how it works)
 
 
-<img src="Scripts/Cleaning/Images/SpellCheck_cleaning_function.svg" alt="lev_function" width="200">
+<img src="scripts/Cleaning/Images/SpellCheck_cleaning_function.svg" alt="lev_function" width="200">
