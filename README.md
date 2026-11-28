@@ -3,7 +3,7 @@
 
 ### `Dashboard/`
 
-
+The Dashboard can be run from `App.R`. Scripts required to run the dashboard are found under `scripts/Clustering`
 
 ### `Results/`
 
